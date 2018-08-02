@@ -4,7 +4,8 @@ from configs.cell_state import CellState
 from configs.rules import SHIP_CONFIG, FIELD_DIMENSIONS
 from helpers import zip_by_keys
 
-def find_checked_coords(field):
+
+def find_checked_cells(field):
     return [
         (i, j)
         for i, row in enumerate(field)
@@ -16,14 +17,15 @@ def find_checked_coords(field):
 def find_adjacent_cells(origin, cells):
     adjacent_square = [
         (-1, -1), (-1, 0), (-1, 1),
-        (0,  -1),          (0,  1),
-        (1,  -1), (1,  0), (1,  1),
+        (0, -1), (0, 1),
+        (1, -1), (1, 0), (1, 1),
     ]
-    diffs = map(lambda other: (other[0] - origin[0], other[1] - origin[1]), cells)
+    diffs = _.map_(cells, lambda other: (other[0] - origin[0], other[1] - origin[1]))
 
-    adjacent = filter(
+    adjacent = _.filter_(
+        _.zip_(cells, diffs),
         lambda pair: pair[1] in adjacent_square,
-        zip(cells, diffs)
+
     )
 
     return _.map_(adjacent, 0)
@@ -48,11 +50,11 @@ def find_adjacent_cells_recursive(origin, cells):
 
 def find_ships(field):
     found_ships = []
-    coords = find_checked_coords(field)
-    while coords:
-        adjacent_group = find_adjacent_cells_recursive(coords[0], coords)
-        coords = [
-            coord for coord in coords if coord not in adjacent_group
+    cells = find_checked_cells(field)
+    while cells:
+        adjacent_group = find_adjacent_cells_recursive(cells[0], cells)
+        cells = [
+            coord for coord in cells if coord not in adjacent_group
         ]
         found_ships.append(adjacent_group)
     return found_ships
@@ -82,9 +84,6 @@ def check_fleet_config(fleet, is_setup_stage=False):
     процессе заполнения и игрок еще не выставил все корабли)
     :return: (bool, [dict])
     """
-    def all_zeros(arr):
-        return all(map(lambda x: x == 0, arr))
-
     lengths = map(len, fleet)
     config = Counter(lengths)
     if is_setup_stage:
@@ -93,11 +92,7 @@ def check_fleet_config(fleet, is_setup_stage=False):
 
         configs = zip_by_keys((config, SHIP_CONFIG), 0)
         diff = _.map_values(configs, lambda counts: counts[1] - counts[0])
-        if all_zeros(diff.values()):
-            return True
-        else:
-            return False, diff
-
+        return False, diff
 
     return config == SHIP_CONFIG
 
@@ -112,7 +107,6 @@ def check_ship_bounds(ship):
         0 <= cell[0] < FIELD_DIMENSIONS[0] and 0 <= cell[1] < FIELD_DIMENSIONS[1]
         for cell in ship
     )
-
 
 
 def validate_field(field, is_setup_stage=False):

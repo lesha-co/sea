@@ -18,7 +18,7 @@ def draw_field(field: Field, locale: Locale, theme: Theme, numbers_right: bool =
     raw_rows = _.map_(view, lambda row: _.chain(row).map_(theme.value.get).join().value())
     line_numbers_fmt = '{{: {}{}}}'.format('<' if numbers_right else '>', CELL_WIDTH)
     line_numbers = _.map_(
-        list(range(1, FIELD_DIMENSIONS[0]+1)),
+        list(range(1, FIELD_DIMENSIONS[0] + 1)),
         line_numbers_fmt.format
     )
     if numbers_right:
@@ -30,7 +30,7 @@ def draw_field(field: Field, locale: Locale, theme: Theme, numbers_right: bool =
     return _.join(lines, '\n')
 
 
-def make_ship_from_str(string:str):
+def make_ship_from_str(string: str):
     pass
 
 

@@ -7,7 +7,7 @@ def make_field(opponent=False):
     field = []
     initial = CellState.CELL_FOG if opponent else CellState.CELL_EMPTY
     for i in range(FIELD_DIMENSIONS[0]):
-        field.append([initial.value]*FIELD_DIMENSIONS[1])
+        field.append([initial.value] * FIELD_DIMENSIONS[1])
     return field
 
 
@@ -33,8 +33,8 @@ class Ship:
     def all_adjacent_cells(self):
         adjacent_square = [
             (-1, -1), (-1, 0), (-1, 1),
-            (0,  -1),          (0,  1),
-            (1,  -1), (1,  0), (1,  1),
+            (0, -1), (0, 1),
+            (1, -1), (1, 0), (1, 1),
         ]
         all_adjacent_cells = []
         for cell in self.cells:
@@ -83,10 +83,9 @@ class Field:
                 splash_damage = ship.all_adjacent_cells()
                 self.exposedCells.update(splash_damage)
 
-
         return self
 
-    def get_view(self, opponent:bool=False):
+    def get_view(self, opponent: bool = False):
         """
         Построить вид поля
         :param opponent: строить с учетом exposedCells
