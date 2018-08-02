@@ -18,7 +18,8 @@ class FieldValidatorTestCase(unittest.TestCase):
             [1, 1, 1, 1],
         ]
         self.assertEqual(
-            check_field.find_checked_cells(field), [(0, 1), (0, 2), (2, 0), (2, 1), (2, 2), (2, 3)]
+            check_field.find_checked_cells(field),
+            [(0, 1), (0, 2), (2, 0), (2, 1), (2, 2), (2, 3)]
         )
 
     def test_find_ships(self):

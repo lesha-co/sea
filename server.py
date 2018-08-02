@@ -1,5 +1,8 @@
 from enum import Enum
 
+import ui
+from configs.locale import Locale
+
 
 class GameState(Enum):
     LOBBY = "LOBBY"  # Игра еще не началась, игроки могут отправить свои поля
@@ -13,4 +16,4 @@ class Server:
     def __init__(self):
         """Создает два пустых поля
         """
-        field_A = input_field("A")
+        field_a = ui.input_field("A", Locale.RU)

@@ -2,13 +2,15 @@ import unittest
 import field
 
 
-class FieldTestCase(unittest.TestCase):
-    def test_view(self):
-        f = field.Field([
+class GetViewTestCase(unittest.TestCase):
+    def setUp(self):
+        self.field = field.Field([
             [(1, 1), (1, 2), (1, 3), (1, 4)],
             [(3, 1), (3, 2), (3, 3)],
         ])
-        self.assertEqual(f.get_view(opponent=False), [
+
+    def test_view_player(self):
+        self.assertEqual(self.field.get_view(opponent=False), [
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
             [1, 2, 2, 2, 2, 1, 1, 1, 1, 1],
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -21,7 +23,8 @@ class FieldTestCase(unittest.TestCase):
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         ])
 
-        self.assertEqual(f.get_view(opponent=True), [
+    def test_view_opponent(self):
+        self.assertEqual(self.field.get_view(opponent=True), [
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -34,9 +37,10 @@ class FieldTestCase(unittest.TestCase):
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         ])
 
-        f.hit((1, 1))
+    def test_view_player_hit_ship(self):
+        self.field.hit((1, 1))
 
-        self.assertEqual(f.get_view(opponent=False), [
+        self.assertEqual(self.field.get_view(opponent=False), [
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
             [1, -2, 2, 2, 2, 1, 1, 1, 1, 1],
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -49,7 +53,10 @@ class FieldTestCase(unittest.TestCase):
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         ])
 
-        self.assertEqual(f.get_view(opponent=True), [
+    def test_view_opponent_hit_ship(self):
+        self.field.hit((1, 1))
+
+        self.assertEqual(self.field.get_view(opponent=True), [
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, -2, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -62,9 +69,10 @@ class FieldTestCase(unittest.TestCase):
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         ])
 
-        f.hit((1, 2)).hit((1, 3)).hit((1, 4))
+    def test_view_opponent_sunk_ship(self):
+        self.field.hit((1, 1)).hit((1, 2)).hit((1, 3)).hit((1, 4))
 
-        self.assertEqual(f.get_view(opponent=True), [
+        self.assertEqual(self.field.get_view(opponent=True), [
             [-1, -1, -1, -1, -1, -1, 0, 0, 0, 0],
             [-1, -2, -2, -2, -2, -1, 0, 0, 0, 0],
             [-1, -1, -1, -1, -1, -1, 0, 0, 0, 0],
