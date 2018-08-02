@@ -1,5 +1,0 @@
-{
-  "check_field_test.py::FieldValidatorTestCase::test_check_fleet_config": true,
-  "check_field_test.py::XXXValidator::test_check_fleet_config_setup_stage_missing_all_ships_of_type": true,
-  "check_field_test.py::XXXValidator::test_check_fleet_config_setup_stage_missing_ship": true
-}
