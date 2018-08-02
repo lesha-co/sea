@@ -1,10 +1,11 @@
-from CellState import CellState
-from rules import FIELD_DIMENSIONS
+from configs.cell_state import CellState
+from check_field import validate_field
+from configs.rules import FIELD_DIMENSIONS
 
 
 def make_field(opponent=False):
     field = []
-    initial = CellState.FOG_OF_WAR if opponent else CellState.EMPTY_CELL
+    initial = CellState.CELL_FOG if opponent else CellState.CELL_EMPTY
     for i in range(FIELD_DIMENSIONS[0]):
         field.append([initial.value]*FIELD_DIMENSIONS[1])
     return field
@@ -13,13 +14,13 @@ def make_field(opponent=False):
 class Ship:
     def __init__(self, cells):
         self.cells = cells
-        self.state = [CellState.DECK_CELL]*len(cells)
+        self.state = [CellState.CELL_DECK] * len(cells)
 
     def get_cell(self, cell):
         return self.state[self.cells.index(cell)]
 
     def hit(self, cell):
-        self.state[self.cells.index(cell)] = CellState.HIT_DECK_CELL
+        self.state[self.cells.index(cell)] = CellState.CELL_DECK_DEAD
 
         return self
 
@@ -27,7 +28,7 @@ class Ship:
         return zip(self.cells, self.state)
 
     def is_dead(self):
-        return all(map(lambda state: state == CellState.HIT_DECK_CELL, self.state))
+        return all(map(lambda state: state == CellState.CELL_DECK_DEAD, self.state))
 
     def all_adjacent_cells(self):
         adjacent_square = [
@@ -44,10 +45,22 @@ class Ship:
 
         return all_adjacent_cells
 
+
 class Field:
-    def __init__(self, fleet):
+    def __init__(self, fleet=None):
+        if fleet is None:
+            fleet = []
         self.fleet = list(map(Ship, fleet))
         self.exposedCells = set()
+
+    def add_fleet(self, ship):
+        new_fleet = self.fleet + [ship]
+        f = Field(fleet=new_fleet)
+        try:
+            validate_field(f.get_view(), is_setup_stage=True)
+            self.fleet = new_fleet
+        except AssertionError:
+            raise BaseException('field is incorrect', ship)
 
     def lookup_ship(self, cell):
         """
@@ -73,7 +86,7 @@ class Field:
 
         return self
 
-    def get_view(self, opponent=False):
+    def get_view(self, opponent:bool=False):
         """
         Построить вид поля
         :param opponent: строить с учетом exposedCells
@@ -84,14 +97,14 @@ class Field:
         for i in range(FIELD_DIMENSIONS[0]):
             for j in range(FIELD_DIMENSIONS[1]):
                 if opponent and not (i, j) in self.exposedCells:
-                    view[i][j] = CellState.FOG_OF_WAR.value
+                    view[i][j] = CellState.CELL_FOG.value
                 else:
                     ship = self.lookup_ship((i, j))
                     if ship:
                         view[i][j] = ship.get_cell((i, j)).value
                     elif (i, j) in self.exposedCells:
-                        view[i][j] = CellState.HIT_EMPTY_CELL.value
+                        view[i][j] = CellState.CELL_MISS.value
                     else:
-                        view[i][j] = CellState.EMPTY_CELL.value
+                        view[i][j] = CellState.CELL_EMPTY.value
 
         return view

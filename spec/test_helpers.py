@@ -1,0 +1,39 @@
+import unittest
+import helpers
+
+class MyTestCase(unittest.TestCase):
+    def test_zip_by_keys(self):
+        dicts = [
+            {"a": 1, "b": 2, "c": 3},
+            {"a": 10, "b": 20, "c": 30},
+            {"a": 100, "b": 200, "c": 300}
+        ]
+        expected = {
+            "a": [1, 10, 100],
+            "b": [2, 20, 200],
+            "c": [3, 30, 300]
+        }
+        self.assertEqual(
+            helpers.zip_by_keys(dicts),
+            expected
+        )
+
+    def test_uneven(self):
+        dicts = [
+            {"a": 1, "b": 2},
+            {"a": 10, "c": 30},
+            {"b": 200, "c": 300}
+        ]
+        expected = {
+            "a": [1, 10, None],
+            "b": [2, None, 200],
+            "c": [None, 30, 300]
+        }
+        self.assertEqual(
+            helpers.zip_by_keys(dicts),
+            expected
+        )
+
+
+if __name__ == '__main__':
+    unittest.main()

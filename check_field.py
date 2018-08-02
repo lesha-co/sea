@@ -1,15 +1,15 @@
+import pydash as _
 from collections import Counter
-
-from CellState import CellState
-from rules import SHIP_CONFIG, FIELD_DIMENSIONS
-
+from configs.cell_state import CellState
+from configs.rules import SHIP_CONFIG, FIELD_DIMENSIONS
+from helpers import zip_by_keys
 
 def find_checked_coords(field):
     return [
         (i, j)
         for i, row in enumerate(field)
         for j, cell in enumerate(row)
-        if cell == CellState.DECK_CELL.value
+        if cell == CellState.CELL_DECK.value
     ]
 
 
@@ -19,14 +19,14 @@ def find_adjacent_cells(origin, cells):
         (0,  -1),          (0,  1),
         (1,  -1), (1,  0), (1,  1),
     ]
-    diffs = map(lambda other: (other[0] - origin[0], other[1]- origin[1]), cells)
+    diffs = map(lambda other: (other[0] - origin[0], other[1] - origin[1]), cells)
 
     adjacent = filter(
         lambda pair: pair[1] in adjacent_square,
         zip(cells, diffs)
     )
 
-    return [adj[0] for adj in adjacent]
+    return _.map_(adjacent, 0)
 
 
 def find_adjacent_cells_recursive(origin, cells):
@@ -74,14 +74,32 @@ def check_ship_shape(ship):
     return len(common_increment) == 1 and common_increment[0] in [(0, 1), (1, 0)]
 
 
-def check_fleet_config(fleet):
+def check_fleet_config(fleet, is_setup_stage=False):
     """
     Проверяет конфигурацию флота (1 4палубный, 2 3палубных итд)
     :param fleet: список кораблей
-    :return: True/False
+    :param is_setup_stage: Если True, то отключает проверку на недостающие корабли (считается, что поле находится в
+    процессе заполнения и игрок еще не выставил все корабли)
+    :return: (bool, [dict])
     """
+    def all_zeros(arr):
+        return all(map(lambda x: x == 0, arr))
+
     lengths = map(len, fleet)
-    return Counter(lengths) == SHIP_CONFIG
+    config = Counter(lengths)
+    if is_setup_stage:
+        if config == SHIP_CONFIG:
+            return True
+
+        configs = zip_by_keys((config, SHIP_CONFIG), 0)
+        diff = _.map_values(configs, lambda counts: counts[1] - counts[0])
+        if all_zeros(diff.values()):
+            return True
+        else:
+            return False, diff
+
+
+    return config == SHIP_CONFIG
 
 
 def check_ship_bounds(ship):
@@ -96,14 +114,18 @@ def check_ship_bounds(ship):
     )
 
 
-def validate_field(field):
+
+def validate_field(field, is_setup_stage=False):
     """
     Проверяет поле на ошибки
     :param field: 2d список клеток
+    :param is_setup_stage: Если True, то отключает проверку на недостающие корабли (считается, что поле находится в
+    процессе заполнения и пользователь еще не выставил все корабли)
     :return:
     """
     ships = find_ships(field)
-    assert check_fleet_config(ships), "Fleet config is invalid (ships are touching or extra/missing ship)"
+    assert check_fleet_config(ships, is_setup_stage), \
+        "Fleet config is invalid (ships are touching or extra/missing ship)"
     for ship in ships:
         assert check_ship_shape(ship), "There is a deformed ship somewhere on the field ({})".format(ship)
         assert check_ship_bounds(ship), "Ship outside bounds ({})".format(ship)

@@ -5,8 +5,11 @@ class GameState(Enum):
     PLAYER_B_MOVE = "B"
     GAMEOVER = "GAMEOVER"
 
+
+
 class Server:
 
-    def __init__():
+    def __init__(self):
         """Создает два пустых поля
         """
+        field_A = input_field("A")
