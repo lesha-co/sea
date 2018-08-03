@@ -9,6 +9,14 @@ from ui import draw_field, make_ship_from_str
 
 
 class DrawFieldTestCase(unittest.TestCase):
+    def common(self, sample, *draw_args, **draw_kwargs):
+        s = draw_field(*draw_args, **draw_kwargs)
+
+        with open('./fixtures/{}.txt'.format(sample), 'r', encoding='utf8') as f:
+            expected_lines = f.readlines()
+            real_lines = s.split('\n')
+            for expected, real in _.zip_(expected_lines, real_lines):
+                self.assertEqual(expected, real + '\n')
 
     def setUp(self):
         self.field = Field(fleet=[
@@ -16,84 +24,36 @@ class DrawFieldTestCase(unittest.TestCase):
         ]).hit((0, 0)).hit((1, 0)).hit((0, 1)).hit((1, 2))
 
     def test_player_numbers_right(self):
-
-        s = draw_field(self.field, Locale.RU, Theme.MAIN, numbers_right=True, opponent=False)
-
-        with open('./fixtures/field_player_numbers_right.txt', 'r', encoding='utf8') as f:
-            expected_lines = f.readlines()
-            real_lines = s.split('\n')
-            for expected, real in _.zip_(expected_lines, real_lines):
-                self.assertEqual(expected, real + '\n')
+        self.common('field_player_numbers_right',
+                    self.field, Locale.RU, Theme.MAIN, numbers_right=True, opponent=False)
 
     def test_player_numbers_left(self):
-
-        s = draw_field(self.field, Locale.RU, Theme.MAIN, numbers_right=False, opponent=False)
-
-        with open('./fixtures/field_player_numbers_left.txt', 'r', encoding='utf8') as f:
-            expected_lines = f.readlines()
-            real_lines = s.split('\n')
-            for expected, real in _.zip_(expected_lines, real_lines):
-                self.assertEqual(expected, real + '\n')
+        self.common('field_player_numbers_left',
+                    self.field, Locale.RU, Theme.MAIN, numbers_right=False, opponent=False)
 
     def test_opponent_numbers_right(self):
-
-        s = draw_field(self.field, Locale.RU, Theme.MAIN, numbers_right=True, opponent=True)
-
-        with open('./fixtures/field_opponent_numbers_right.txt', 'r', encoding='utf8') as f:
-            expected_lines = f.readlines()
-            real_lines = s.split('\n')
-            for expected, real in _.zip_(expected_lines, real_lines):
-                self.assertEqual(expected, real + '\n')
+        self.common('field_opponent_numbers_right',
+                    self.field, Locale.RU, Theme.MAIN, numbers_right=True, opponent=True)
 
     def test_opponent_numbers_left(self):
-
-        s = draw_field(self.field, Locale.RU, Theme.MAIN, numbers_right=False, opponent=True)
-
-        with open('./fixtures/field_opponent_numbers_left.txt', 'r', encoding='utf8') as f:
-            expected_lines = f.readlines()
-            real_lines = s.split('\n')
-            for expected, real in _.zip_(expected_lines, real_lines):
-                self.assertEqual(expected, real + '\n')
+        self.common('field_opponent_numbers_left',
+                    self.field, Locale.RU, Theme.MAIN, numbers_right=False, opponent=True)
 
     def test_player_numbers_right_border(self):
-
-        s = draw_field(self.field, Locale.RU, Theme.MAIN, numbers_right=True, opponent=False, border=True)
-
-        with open('./fixtures/field_player_numbers_right_border.txt', 'r', encoding='utf8') as f:
-            expected_lines = f.readlines()
-            real_lines = s.split('\n')
-            for expected, real in _.zip_(expected_lines, real_lines):
-                self.assertEqual(expected, real + '\n')
+        self.common('field_player_numbers_right_border',
+                    self.field, Locale.RU, Theme.MAIN, numbers_right=True, opponent=False, border=True)
 
     def test_player_numbers_left_border(self):
-
-        s = draw_field(self.field, Locale.RU, Theme.MAIN, numbers_right=False, opponent=False, border=True)
-
-        with open('./fixtures/field_player_numbers_left_border.txt', 'r', encoding='utf8') as f:
-            expected_lines = f.readlines()
-            real_lines = s.split('\n')
-            for expected, real in _.zip_(expected_lines, real_lines):
-                self.assertEqual(expected, real + '\n')
+        self.common('field_player_numbers_left_border',
+                    self.field, Locale.RU, Theme.MAIN, numbers_right=False, opponent=False, border=True)
 
     def test_opponent_numbers_right_border(self):
-
-        s = draw_field(self.field, Locale.RU, Theme.MAIN, numbers_right=True, opponent=True, border=True)
-
-        with open('./fixtures/field_opponent_numbers_right_border.txt', 'r', encoding='utf8') as f:
-            expected_lines = f.readlines()
-            real_lines = s.split('\n')
-            for expected, real in _.zip_(expected_lines, real_lines):
-                self.assertEqual(expected, real + '\n')
+        self.common('field_opponent_numbers_right_border',
+                    self.field, Locale.RU, Theme.MAIN, numbers_right=True, opponent=True, border=True)
 
     def test_opponent_numbers_left_border(self):
-
-        s = draw_field(self.field, Locale.RU, Theme.MAIN, numbers_right=False, opponent=True, border=True)
-
-        with open('./fixtures/field_opponent_numbers_left_border.txt', 'r', encoding='utf8') as f:
-            expected_lines = f.readlines()
-            real_lines = s.split('\n')
-            for expected, real in _.zip_(expected_lines, real_lines):
-                self.assertEqual(expected, real + '\n')
+        self.common('field_opponent_numbers_left_border',
+                    self.field, Locale.RU, Theme.MAIN, numbers_right=False, opponent=True, border=True)
 
 
 class MakeShipFromStrTestCase(unittest.TestCase):
