@@ -55,6 +55,46 @@ class DrawFieldTestCase(unittest.TestCase):
             for expected, real in _.zip_(expected_lines, real_lines):
                 self.assertEqual(expected, real + '\n')
 
+    def test_player_numbers_right_border(self):
+
+        s = draw_field(self.field, Locale.RU, Theme.MAIN, numbers_right=True, opponent=False, border=True)
+
+        with open('./fixtures/field_player_numbers_right_border.txt', 'r', encoding='utf8') as f:
+            expected_lines = f.readlines()
+            real_lines = s.split('\n')
+            for expected, real in _.zip_(expected_lines, real_lines):
+                self.assertEqual(expected, real + '\n')
+
+    def test_player_numbers_left_border(self):
+
+        s = draw_field(self.field, Locale.RU, Theme.MAIN, numbers_right=False, opponent=False, border=True)
+
+        with open('./fixtures/field_player_numbers_left_border.txt', 'r', encoding='utf8') as f:
+            expected_lines = f.readlines()
+            real_lines = s.split('\n')
+            for expected, real in _.zip_(expected_lines, real_lines):
+                self.assertEqual(expected, real + '\n')
+
+    def test_opponent_numbers_right_border(self):
+
+        s = draw_field(self.field, Locale.RU, Theme.MAIN, numbers_right=True, opponent=True, border=True)
+
+        with open('./fixtures/field_opponent_numbers_right_border.txt', 'r', encoding='utf8') as f:
+            expected_lines = f.readlines()
+            real_lines = s.split('\n')
+            for expected, real in _.zip_(expected_lines, real_lines):
+                self.assertEqual(expected, real + '\n')
+
+    def test_opponent_numbers_left_border(self):
+
+        s = draw_field(self.field, Locale.RU, Theme.MAIN, numbers_right=False, opponent=True, border=True)
+
+        with open('./fixtures/field_opponent_numbers_left_border.txt', 'r', encoding='utf8') as f:
+            expected_lines = f.readlines()
+            real_lines = s.split('\n')
+            for expected, real in _.zip_(expected_lines, real_lines):
+                self.assertEqual(expected, real + '\n')
+
 
 class MakeShipFromStrTestCase(unittest.TestCase):
     def test_horizontal_ru(self):
@@ -73,6 +113,12 @@ class MakeShipFromStrTestCase(unittest.TestCase):
         self.assertEqual(
             make_ship_from_str("Г1Г4", Locale.RU),
             [(0, 3), (1, 3), (2, 3), (3, 3)]
+        )
+
+    def test_vertical_ru_upper_left(self):
+        self.assertEqual(
+            make_ship_from_str("А1А4", Locale.RU),
+            [(0, 0), (1, 0), (2, 0), (3, 0)]
         )
 
     def test_diagonal_ru(self):
@@ -104,6 +150,12 @@ class MakeShipFromStrTestCase(unittest.TestCase):
             make_ship_from_str("Г1Г2", Locale.EN)
 
         self.assertEqual(ctx.exception.args[0], 'Incorrect input')
+
+    def test_10(self):
+        self.assertEqual(
+            make_ship_from_str("А10Г10", Locale.RU),
+            [(9, 0), (9, 1), (9, 2), (9, 3)]
+        )
 
 
 if __name__ == '__main__':

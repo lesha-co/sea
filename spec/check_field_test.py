@@ -160,39 +160,56 @@ class FleetConfigValidator(unittest.TestCase):
         ]))
 
     def test_check_fleet_config_extra_ship(self):
-        self.assertFalse(check_field.check_fleet_config([
-            [1, 2, 3, 4], [1, 2, 3, 4],
-            [1, 2, 3], [1, 2, 3],
-            [1, 2], [1, 2], [1, 2],
-            [1], [1], [1], [1],
-        ]))
+        self.assertEqual(
+            (False, None),
+            check_field.check_fleet_config([
+                [1, 2, 3, 4], [1, 2, 3, 4],
+                [1, 2, 3], [1, 2, 3],
+                [1, 2], [1, 2], [1, 2],
+                [1], [1], [1], [1],
+            ])
+        )
 
     def test_check_fleet_config_missing_ship(self):
-        self.assertFalse(check_field.check_fleet_config([
-            [1, 2, 3], [1, 2, 3],
-            [1, 2], [1, 2], [1, 2],
-            [1], [1], [1], [1],
-        ]))
-
-    def test_check_fleet_config_setup_stage_missing_all_ships_of_type(self):
         self.assertEqual(
+            (False, {4: 1}),
             check_field.check_fleet_config([
                 [1, 2, 3], [1, 2, 3],
                 [1, 2], [1, 2], [1, 2],
                 [1], [1], [1], [1],
-            ], is_setup_stage=True),
-            (False, {4: 1, 3: 0, 2: 0, 1: 0})
+            ])
+        )
+
+    def test_check_fleet_config_setup_stage_missing_all_ships_of_type(self):
+        self.assertEqual(
+            (True, {4: 1}),
+            check_field.check_fleet_config([
+                [1, 2, 3], [1, 2, 3],
+                [1, 2], [1, 2], [1, 2],
+                [1], [1], [1], [1],
+            ], is_setup_stage=True)
         )
 
     def test_check_fleet_config_setup_stage_missing_ship(self):
         self.assertEqual(
+            (True, {1: 1}),
             check_field.check_fleet_config([
                 [1, 2, 3, 4],
                 [1, 2, 3], [1, 2, 3],
                 [1, 2], [1, 2], [1, 2],
                 [1], [1], [1],
             ], is_setup_stage=True),
-            (False, {4: 0, 3: 0, 2: 0, 1: 1})
+        )
+
+    def test_check_fleet_config_setup_stage_extra_ship(self):
+        self.assertEqual(
+            (False, None),
+            check_field.check_fleet_config([
+                [1, 2, 3, 4], [1, 2, 3, 4],
+                [1, 2, 3], [1, 2, 3],
+                [1, 2], [1, 2], [1, 2],
+                [1], [1], [1],
+            ], is_setup_stage=True)
         )
 
 

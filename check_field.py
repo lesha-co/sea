@@ -83,18 +83,27 @@ def check_fleet_config(fleet, is_setup_stage=False):
     :param is_setup_stage: Если True, то отключает проверку на недостающие корабли (считается, что поле находится в
     процессе заполнения и игрок еще не выставил все корабли)
     :return: (bool, [dict])
+    Если флот собран корректно, возвращает True, None
+    Если есть лишние корабли, возвращает False, None
+    Если кораблей не хватает, возвращает True или False (в зависимости от is_setup_stage) и список слотов
     """
     lengths = map(len, fleet)
     config = Counter(lengths)
-    if is_setup_stage:
-        if config == SHIP_CONFIG:
-            return True
 
-        configs = zip_by_keys((config, SHIP_CONFIG), 0)
-        diff = _.map_values(configs, lambda counts: counts[1] - counts[0])
-        return False, diff
+    if config == SHIP_CONFIG:
+        return True, None
 
-    return config == SHIP_CONFIG
+    # Checking for extra ships
+    configs = zip_by_keys((config, SHIP_CONFIG), 0)
+    diff = _.map_values(configs, lambda counts: counts[1] - counts[0])
+    extra_ships = any(_.map_(list(diff.values()), lambda x: x < 0))
+    if extra_ships:
+        return False, None
+
+    missing_ships = {k: v for k, v in diff.items() if v > 0}
+    if missing_ships:
+        return is_setup_stage, missing_ships
+
 
 
 def check_ship_bounds(ship):
@@ -118,8 +127,8 @@ def validate_field(field, is_setup_stage=False):
     :return:
     """
     ships = find_ships(field)
-    assert check_fleet_config(ships, is_setup_stage), \
-        "Fleet config is invalid (ships are touching or extra/missing ship)"
+    config_correct, diff = check_fleet_config(ships, is_setup_stage)
+    assert config_correct, "Fleet config is invalid (ships are touching or extra/missing ship)"
     for ship in ships:
         assert check_ship_shape(ship), "There is a deformed ship somewhere on the field ({})".format(ship)
         assert check_ship_bounds(ship), "Ship outside bounds ({})".format(ship)

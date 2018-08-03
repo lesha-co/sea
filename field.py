@@ -1,5 +1,5 @@
 from configs.cell_state import CellState
-from check_field import validate_field
+from check_field import validate_field, check_fleet_config
 from configs.rules import FIELD_DIMENSIONS
 
 
@@ -15,6 +15,9 @@ class Ship:
     def __init__(self, cells):
         self.cells = cells
         self.state = [CellState.CELL_DECK] * len(cells)
+
+    def __len__(self):
+        return len(self.cells)
 
     def get_cell(self, cell):
         return self.state[self.cells.index(cell)]
@@ -50,17 +53,20 @@ class Field:
     def __init__(self, fleet=None):
         if fleet is None:
             fleet = []
-        self.fleet = list(map(Ship, fleet))
+
+        if fleet and type(fleet[0]) is list:
+            fleet= list(map(Ship, fleet))
+        self.fleet = fleet
         self.exposedCells = set()
 
     def add_fleet(self, ship):
-        new_fleet = self.fleet + [ship]
+        new_fleet = self.fleet + [Ship(ship)]
         f = Field(fleet=new_fleet)
         try:
             validate_field(f.get_view(), is_setup_stage=True)
             self.fleet = new_fleet
-        except AssertionError:
-            raise BaseException('field is incorrect', ship)
+        except AssertionError as x:
+            raise BaseException('field is incorrect', x, ship)
 
     def lookup_ship(self, cell):
         """
