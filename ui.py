@@ -14,7 +14,8 @@ CELL_WIDTH = 3
 def draw_field(field: Field, locale: Locale, theme: Theme,
                numbers_right: bool = False,
                opponent: bool = False,
-               border: bool =False):
+               border: bool = False,
+               contours: bool = False):
     header = _.chain(locale.value).map_(lambda x: "{: ^{}}".format(x, CELL_WIDTH)).join().value()
 
     if numbers_right:
@@ -33,7 +34,7 @@ def draw_field(field: Field, locale: Locale, theme: Theme,
             sub_header = ' '*CELL_WIDTH + ' ┌─' + sub_header
             header = '  ' + header
 
-    view = field.get_view(opponent)
+    view = field.get_view(opponent, contours)
     raw_rows = _.map_(view, lambda row: _.chain(row).map_(theme.value.get).join().value())
     line_numbers_fmt = '{{: {}{}}}'.format('<' if numbers_right else '>', CELL_WIDTH)
     line_numbers = _.map_(
@@ -115,7 +116,7 @@ def input_field(player, locale: Locale, theme: Theme):
     while diff:
         print(' {player}, SET UP YOUR FIELD: \n'.format(player=player))
         print(' ' + draw_slots(diff, theme) + '\n')
-        print(draw_field(f, locale, theme, border=True))
+        print(draw_field(f, locale, theme, border=True, contours=True))
 
         ship = input("Add ship >").strip()
         try:
@@ -131,4 +132,4 @@ if __name__ == '__main__':
     cur_theme = Theme.MAIN
     field_a = input_field('PLAYER A', cur_locale, cur_theme)
     print(' PLAYER A FIELD: \n')
-    print(draw_field(field_a, cur_locale, cur_theme, border=True))
+    print(draw_field(field_a, cur_locale, cur_theme, border=True, contours=True))

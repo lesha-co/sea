@@ -91,13 +91,19 @@ class Field:
 
         return self
 
-    def get_view(self, opponent: bool = False):
+    def get_view(self, opponent: bool = False, draw_contours: bool = False):
         """
         Построить вид поля
         :param opponent: строить с учетом exposedCells
+        :param draw_contours: показывать клетки, где запрещено ставить корабли (только если opponent=False)
         :return: 2д список (0)
         """
         view = make_field(opponent)
+        draw_contours = draw_contours and not opponent
+        contours = set()
+        if draw_contours:
+            for ship in self.fleet:
+                contours.update(ship.all_adjacent_cells())
 
         for i in range(FIELD_DIMENSIONS[0]):
             for j in range(FIELD_DIMENSIONS[1]):
@@ -109,6 +115,8 @@ class Field:
                         view[i][j] = ship.get_cell((i, j)).value
                     elif (i, j) in self.exposedCells:
                         view[i][j] = CellState.CELL_MISS.value
+                    elif (i, j) in contours:
+                        view[i][j] = CellState.CELL_CANT_PLACE_SHIP.value
                     else:
                         view[i][j] = CellState.CELL_EMPTY.value
 
