@@ -11,6 +11,17 @@ import re
 CELL_WIDTH = 3
 
 
+def micro_draw(field_a, field_b, current_player, **kwargs):
+    left_field = field_a if current_player == 0 else field_b
+    right_field = field_b if current_player == 0 else field_a
+    draw_left = draw_field(left_field, numbers_right=False, opponent=False, **kwargs).split('\n')
+    draw_right = draw_field(right_field, numbers_right=True, opponent=True, **kwargs).split('\n')
+
+    lines = _.zip_(draw_left, draw_right)
+    combo_lines = _.map_(lines, lambda pair: ' : '.join(pair))
+    return '\n'.join(combo_lines)
+
+
 def draw_field(field: Field, locale: Locale, theme: Theme,
                numbers_right: bool = False,
                opponent: bool = False,
@@ -114,7 +125,7 @@ def input_field(player, locale: Locale, theme: Theme):
     f = Field()
     fleet_correct, diff = check_fleet_config(f.fleet, is_setup_stage=True)
     while diff:
-        print(' {player}, SET UP YOUR FIELD: \n'.format(player=player))
+        print('Игрок {player}, выставьте свои корабли: \n'.format(player=player))
         print(' ' + draw_slots(diff, theme) + '\n')
         print(draw_field(f, locale, theme, border=True, contours=True))
 
@@ -125,11 +136,3 @@ def input_field(player, locale: Locale, theme: Theme):
         except BaseException as x:
             print(x)
     return f
-
-
-if __name__ == '__main__':
-    cur_locale = Locale.RU
-    cur_theme = Theme.MAIN
-    field_a = input_field('PLAYER A', cur_locale, cur_theme)
-    print(' PLAYER A FIELD: \n')
-    print(draw_field(field_a, cur_locale, cur_theme, border=True, contours=True))

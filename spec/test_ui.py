@@ -21,7 +21,11 @@ class DrawFieldTestCase(unittest.TestCase):
     def setUp(self):
         self.field = Field(fleet=[
             [(1, 1), (1, 2), (1, 3), (1, 4)]
-        ]).hit((0, 0)).hit((1, 0)).hit((0, 1)).hit((1, 2))
+        ])
+        self.field.hit((0, 0))
+        self.field.hit((1, 0))
+        self.field.hit((0, 1))
+        self.field.hit((1, 2))
 
     def test_player_numbers_right(self):
         self.common('field_player_numbers_right',

@@ -70,7 +70,10 @@ class GetViewTestCase(unittest.TestCase):
         ])
 
     def test_view_opponent_sunk_ship(self):
-        self.field.hit((1, 1)).hit((1, 2)).hit((1, 3)).hit((1, 4))
+        self.field.hit((1, 1))
+        self.field.hit((1, 2))
+        self.field.hit((1, 3))
+        self.field.hit((1, 4))
 
         self.assertEqual(self.field.get_view(opponent=True), [
             [-1, -1, -1, -1, -1, -1, 0, 0, 0, 0],

@@ -1,5 +1,6 @@
 from configs.cell_state import CellState
-from check_field import validate_field, check_fleet_config
+from check_field import validate_field, check_fleet_config, find_ships
+from configs.response import Response
 from configs.rules import FIELD_DIMENSIONS
 
 
@@ -9,6 +10,11 @@ def make_field(opponent=False):
     for i in range(FIELD_DIMENSIONS[0]):
         field.append([initial.value] * FIELD_DIMENSIONS[1])
     return field
+
+
+def load_field(field):
+    ships = find_ships(field)
+    return Field(ships)
 
 
 class Ship:
@@ -55,7 +61,7 @@ class Field:
             fleet = []
 
         if fleet and type(fleet[0]) is list:
-            fleet= list(map(Ship, fleet))
+            fleet = list(map(Ship, fleet))
         self.fleet = fleet
         self.exposedCells = set()
 
@@ -79,6 +85,9 @@ class Field:
                 return ship
         return None
 
+    def is_dead(self):
+        return all(map(lambda ship: ship.is_dead(), self.fleet))
+
     def hit(self, cell):
         self.exposedCells.add(cell)
         ship = self.lookup_ship(cell)
@@ -88,8 +97,13 @@ class Field:
                 # splash damage
                 splash_damage = ship.all_adjacent_cells()
                 self.exposedCells.update(splash_damage)
-
-        return self
+                if self.is_dead():
+                    return Response.LOST
+                return Response.KILL
+            else:
+                return Response.HIT
+        else:
+            return Response.MISS
 
     def get_view(self, opponent: bool = False, draw_contours: bool = False):
         """
