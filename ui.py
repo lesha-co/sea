@@ -11,11 +11,9 @@ import re
 CELL_WIDTH = 3
 
 
-def micro_draw(field_a, field_b, current_player, **kwargs):
-    left_field = field_a if current_player == 0 else field_b
-    right_field = field_b if current_player == 0 else field_a
-    draw_left = draw_field(left_field, numbers_right=False, opponent=False, **kwargs).split('\n')
-    draw_right = draw_field(right_field, numbers_right=True, opponent=True, **kwargs).split('\n')
+def micro_draw(target_field, current_field, **kwargs):
+    draw_left = draw_field(target_field, numbers_right=False, opponent=True, **kwargs).split('\n')
+    draw_right = draw_field(current_field, numbers_right=True, opponent=False, **kwargs).split('\n')
 
     lines = _.zip_(draw_left, draw_right)
     combo_lines = _.map_(lines, lambda pair: ' : '.join(pair))
@@ -28,11 +26,13 @@ def draw_field(field: Field, locale: Locale, theme: Theme,
                border: bool = False,
                contours: bool = False):
     header = _.chain(locale.value).map_(lambda x: "{: ^{}}".format(x, CELL_WIDTH)).join().value()
-
+    name_header = '{:<{}}'.format(field.player_name, CELL_WIDTH*len(locale.value))
     if numbers_right:
+        name_header = ' '.join([name_header, ' ' * CELL_WIDTH])
         header = ' '.join([header, ' ' * CELL_WIDTH])
     else:
         header = ' '.join([' ' * CELL_WIDTH, header])
+        name_header = ' '.join([' ' * CELL_WIDTH, name_header])
 
     sub_header = None
     if border:
@@ -40,10 +40,12 @@ def draw_field(field: Field, locale: Locale, theme: Theme,
         if numbers_right:
             sub_header += '─┐ ' + ' '*CELL_WIDTH
             header += '  '
+            name_header += '  '
 
         else:
             sub_header = ' '*CELL_WIDTH + ' ┌─' + sub_header
             header = '  ' + header
+            name_header = '  ' + name_header
 
     view = field.get_view(opponent, contours)
     raw_rows = _.map_(view, lambda row: _.chain(row).map_(theme.value.get).join().value())
@@ -60,7 +62,7 @@ def draw_field(field: Field, locale: Locale, theme: Theme,
     column_separator = ' '
     if border:
             column_separator = ' │ '
-    lines = [header]
+    lines = [name_header, header]
     if border:
         lines.append(sub_header)
     lines += _.map_(columns, column_separator.join)
@@ -80,6 +82,7 @@ def to_cell_coordinates(item, locale: Locale):
 
 
 def make_ship_from_str(string: str, locale: Locale):
+    
     alpha = locale.value
     pattern = r'^([{}])(\d+)(?:([{}])(\d+))?$'.format(alpha, alpha)
     findings = re.findall(pattern, string)
@@ -89,9 +92,16 @@ def make_ship_from_str(string: str, locale: Locale):
     ship = _.map_(findings[0], lambda item: to_cell_coordinates(item, locale))
     if ship[2] is None:
         # single deck ship
+        assert 0 <= ship[1] < FIELD_DIMENSIONS[0], 'Incorrect Input'
+        assert 0 <= ship[0] < FIELD_DIMENSIONS[1], 'Incorrect Input'
         return [(ship[1], ship[0])]
 
     else:
+        assert 0 <= ship[1] < FIELD_DIMENSIONS[0], 'Incorrect Input'
+        assert 0 <= ship[0] < FIELD_DIMENSIONS[1], 'Incorrect Input'
+        assert 0 <= ship[3] < FIELD_DIMENSIONS[0], 'Incorrect Input'
+        assert 0 <= ship[2] < FIELD_DIMENSIONS[1], 'Incorrect Input'
+
         start = [ship[1], ship[0]]
         finish = [ship[3], ship[2]]
         diff = _.chain(_.zip_(start, finish)).map_(lambda x: x[1] - x[0]).value()
@@ -121,11 +131,11 @@ def draw_slots(diff, theme:Theme):
     return ' '.join(strings)
 
 
-def input_field(player, locale: Locale, theme: Theme):
-    f = Field()
+def input_field(player_name, locale: Locale, theme: Theme):
+    f = Field(None, player_name=player_name)
     fleet_correct, diff = check_fleet_config(f.fleet, is_setup_stage=True)
     while diff:
-        print('Игрок {player}, выставьте свои корабли: \n'.format(player=player))
+        print('Игрок {player_name}, выставьте свои корабли: \n'.format(player_name=player_name))
         print(' ' + draw_slots(diff, theme) + '\n')
         print(draw_field(f, locale, theme, border=True, contours=True))
 

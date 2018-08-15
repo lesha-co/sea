@@ -21,7 +21,7 @@ class DrawFieldTestCase(unittest.TestCase):
     def setUp(self):
         self.field = Field(fleet=[
             [(1, 1), (1, 2), (1, 3), (1, 4)]
-        ])
+        ], player_name='player_name')
         self.field.hit((0, 0))
         self.field.hit((1, 0))
         self.field.hit((0, 1))
@@ -120,6 +120,14 @@ class MakeShipFromStrTestCase(unittest.TestCase):
             make_ship_from_str("А10Г10", Locale.RU),
             [(9, 0), (9, 1), (9, 2), (9, 3)]
         )
+
+    def test_out_of_bounds(self):
+        with self.assertRaises(Exception) as ctx:
+            make_ship_from_str("Г10Г12", Locale.RU)
+
+    def test_out_of_bounds_2(self):
+        with self.assertRaises(Exception) as ctx:
+            make_ship_from_str("А9А11", Locale.RU)
 
 
 if __name__ == '__main__':

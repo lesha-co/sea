@@ -2,7 +2,8 @@ from enum import Enum
 
 
 class Response(Enum):
-    MISS = 0
-    HIT = 1
-    KILL = 2
-    LOST = 3
+    MISS = 'Мимо'
+    HIT = 'Попадение'
+    KILL = 'Убит'
+    LOST = 'Все'
+    REPEAT = 'В эту клетку уже стреляли'

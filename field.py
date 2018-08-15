@@ -12,9 +12,9 @@ def make_field(opponent=False):
     return field
 
 
-def load_field(field):
+def load_field(field, player_name):
     ships = find_ships(field)
-    return Field(ships)
+    return Field(ships, player_name)
 
 
 class Ship:
@@ -56,7 +56,8 @@ class Ship:
 
 
 class Field:
-    def __init__(self, fleet=None):
+    def __init__(self, fleet=None, player_name=''):
+        self.player_name = player_name
         if fleet is None:
             fleet = []
 
@@ -67,7 +68,7 @@ class Field:
 
     def add_fleet(self, ship):
         new_fleet = self.fleet + [Ship(ship)]
-        f = Field(fleet=new_fleet)
+        f = Field(fleet=new_fleet, player_name=self.player_name)
         try:
             validate_field(f.get_view(), is_setup_stage=True)
             self.fleet = new_fleet
@@ -89,6 +90,8 @@ class Field:
         return all(map(lambda ship: ship.is_dead(), self.fleet))
 
     def hit(self, cell):
+        if cell in self.exposedCells:
+            return Response.REPEAT
         self.exposedCells.add(cell)
         ship = self.lookup_ship(cell)
         if ship:
