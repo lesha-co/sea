@@ -1,14 +1,19 @@
+from functools import reduce
+from random import choice
 from typing import List, Optional
 
-from check_field import validate_field, find_ships
-from config import CellState, Response, FIELD_DIMENSIONS
+from pydash import py_
+
+from check_field import validate_field, find_ships, get_available_cells, find_straight_segments, check_fleet_config
+from config import CellState, Response, FIELD_DIMENSIONS, SHIP_CONFIG
 from my_types.coord import Coord
+from my_types.matrix_int import MatrixInt
 from my_types.weak_ship import WeakShip
 from ship import Ship
 
 
 class Field:
-    def __init__(self, fleet: Optional[List[WeakShip]]=None, player_name='') -> None:
+    def __init__(self, fleet: Optional[List[WeakShip]] = None, player_name='') -> None:
         self.player_name = player_name
         if fleet is None:
             fleet = []
@@ -91,7 +96,7 @@ class Field:
         return view
 
     @staticmethod
-    def make_field(opponent=False) -> List[List[int]]:
+    def make_field(opponent=False) -> MatrixInt:
         field = []
         initial = CellState.CELL_FOG if opponent else CellState.CELL_EMPTY
         for i in range(FIELD_DIMENSIONS[0]):
@@ -99,7 +104,42 @@ class Field:
         return field
 
     @staticmethod
-    def load_field(field: List[List[int]], player_name: str) -> 'Field':
+    def load_field(field: MatrixInt, player_name: str) -> 'Field':
         return Field(find_ships(field), player_name)
 
+    @staticmethod
+    def generate_random_field(player_name: str, base: Optional['Field'] = None) -> 'Field':
+        missing_config = SHIP_CONFIG
+        if base:
+            initial = base.get_view()
+            _, missing_config = check_fleet_config(find_ships(initial), True)
+        else:
+            initial = Field.make_field()
 
+        lengths = []
+        for k, v in missing_config.items():
+            for i in range(v):
+                lengths.append(k)
+
+        lengths = sorted(lengths, reverse=True)
+        f = reduce(Field._try_place, lengths, initial)
+        return Field(find_ships(f), player_name)
+
+    @staticmethod
+    def _try_place(acc: MatrixInt, desired_length: int) -> MatrixInt:
+        available_cells = get_available_cells(acc, FIELD_DIMENSIONS)
+        segments = find_straight_segments(available_cells, True) + \
+            find_straight_segments(available_cells, False)
+
+        available_segments = py_.filter_(segments, lambda segment: len(segment) >= desired_length)
+        chosen_segment = choice(available_segments)
+
+        len_diff = len(chosen_segment) - desired_length
+        available_subsegments = py_.map_(list(range(len_diff + 1)), lambda x: chosen_segment[x:x + desired_length])
+        chosen_subsegment = choice(available_subsegments)
+
+        new_field = py_.clone_deep(acc)
+        for i, j in chosen_subsegment:
+            new_field[i][j] = CellState.CELL_DECK.value
+
+        return new_field

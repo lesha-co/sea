@@ -25,7 +25,7 @@ class Client:
         Сервер запрашивает поле
         :return: int[][]
         """
-        raise Exception('Can\'t use base class')
+        return Field.generate_random_field(self.client_id)
 
     def request_move(self, my_field: Field, opponent_field: Field) -> Coord:
         """

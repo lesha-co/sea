@@ -135,7 +135,10 @@ def input_field(player_name, locale: Locale, theme: Theme):
         print(' ' + draw_slots(diff, theme) + '\n')
         print(draw_field(f, locale, theme, border=True, contours=True))
 
-        ship = input("Add ship >").strip()
+        ship = input("Добавить корабль (⏎ для рандомного поля) >").strip()
+        if not ship:
+            return Field.generate_random_field(player_name, base=f)
+
         try:
             f.add_fleet(make_ship_from_str(ship, locale))
             fleet_correct, diff = check_fleet_config(f.fleet, is_setup_stage=True)

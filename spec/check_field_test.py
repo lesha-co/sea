@@ -1,6 +1,8 @@
 from unittest import TestCase, main
-from check_field import find_checked_cells, find_ships, find_adjacent_cells,\
-                        validate_field, check_ship_shape, check_fleet_config
+
+from check_field import find_checked_cells, find_ships, find_adjacent_cells, \
+    validate_field, check_ship_shape, check_fleet_config, get_available_cells, \
+    find_straight_segments
 from config import CellState
 
 
@@ -211,6 +213,80 @@ class FleetConfigValidator(TestCase):
                 [1, 2], [1, 2], [1, 2],
                 [1], [1], [1],
             ], is_setup_stage=True)
+        )
+
+
+class GetAvailableCellsValidator(TestCase):
+    def test_basic(self) -> None:
+        c = CellState.CELL_DECK.value
+        field = [
+            [0, 0, 0, 0],
+            [0, c, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0]
+        ]
+        self.assertEqual(
+            [
+                (0, 3), (1, 3), (2, 3), (3, 0), (3, 1), (3, 2), (3, 3)
+            ],
+            sorted(get_available_cells(field, (4, 4)))
+        )
+
+    def test_bigger_field(self) -> None:
+        c = CellState.CELL_DECK.value
+        field = [
+            [0, 0, 0, 0, 0, 0],
+            [0, c, 0, 0, 0, 0],
+            [0, 0, 0, 0, c, 0],
+            [0, 0, 0, 0, 0, 0]
+        ]
+        self.assertEqual(
+            [
+                (0, 3), (0, 4), (0, 5),
+                (3, 0), (3, 1), (3, 2)
+            ],
+            sorted(get_available_cells(field, (4, 6)))
+        )
+
+
+class FindStraightSegmentsValidator(TestCase):
+    def test_singular(self) -> None:
+        c = CellState.CELL_DECK.value
+        field = [
+            [0, 0, 0, 0],
+            [0, c, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0]
+        ]
+        self.assertEqual(
+            [
+                [(0, 3)],
+                [(1, 3)],
+                [(2, 3)],
+                [(3, 0), (3, 1), (3, 2), (3, 3)]
+            ],
+            find_straight_segments(get_available_cells(field, (4, 4)))
+        )
+
+    def test_singular_vertical(self) -> None:
+        c = CellState.CELL_DECK.value
+        field = [
+            [0, 0, 0, 0],
+            [0, c, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0]
+        ]
+        self.assertEqual(
+            [
+                [(0, 3), (1, 3), (2, 3), (3, 3)],
+                [(3, 0)],
+                [(3, 1)],
+                [(3, 2)]
+            ],
+            find_straight_segments(
+                get_available_cells(field, (4, 4)),
+                vertical=True
+            )
         )
 
 

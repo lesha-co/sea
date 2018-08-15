@@ -1,13 +1,42 @@
 from collections import Counter
+from itertools import product
 from typing import List, Optional, Tuple, Dict, Any
 
-from pydash import py_
+import pydash as py_
 
 from config import CellState, SHIP_CONFIG, FIELD_DIMENSIONS
 from helpers import group_by_keys
 from my_types.coord import Coord
 from my_types.matrix_int import MatrixInt
 from my_types.weak_ship import WeakShip
+
+
+def get_available_cells(field: MatrixInt, dimensions: Coord) -> List[Coord]:
+    checked = find_checked_cells(field)
+    all_cells = list(product(range(dimensions[0]), range(dimensions[1])))
+    nearby = py_.flat_map(checked, lambda cell: find_adjacent_cells(cell, all_cells))
+    return list(set(all_cells) - set(nearby) - set(checked))
+
+
+def find_straight_segments(cells: List[Coord], vertical: bool = False) -> List[List[Coord]]:
+
+    def inc(a: Coord, b: Coord) -> Coord:
+        return a[0] + b[0], a[1] + b[1]
+
+    groups = []
+    sorted_cells = sorted(cells)
+    increment = (1, 0) if vertical else (0, 1)
+    while sorted_cells:
+        group = []
+        cell = sorted_cells[0]
+
+        while cell in sorted_cells:
+            sorted_cells.remove(cell)
+            group.append(cell)
+            cell = inc(cell, increment)
+
+        groups.append(group)
+    return groups
 
 
 def find_checked_cells(field: MatrixInt):
