@@ -1,11 +1,16 @@
-import pydash as _
 from collections import Counter
-from configs.cell_state import CellState
-from configs.rules import SHIP_CONFIG, FIELD_DIMENSIONS
+from typing import List, Optional, Tuple, Dict, Any
+
+from pydash import py_
+
+from configs import CellState, SHIP_CONFIG, FIELD_DIMENSIONS
 from helpers import zip_by_keys
+from my_types.coord import Coord
+from my_types.matrix_int import MatrixInt
+from my_types.weak_ship import WeakShip
 
 
-def find_checked_cells(field):
+def find_checked_cells(field: MatrixInt):
     return [
         (i, j)
         for i, row in enumerate(field)
@@ -14,24 +19,29 @@ def find_checked_cells(field):
     ]
 
 
-def find_adjacent_cells(origin, cells):
+def find_adjacent_cells(origin: Coord, cells: List[Coord]) -> List[Coord]:
+    """
+    Находит соседние клетки от origin среди cells
+    :param origin:
+    :param cells:
+    :return:
+    """
     adjacent_square = [
         (-1, -1), (-1, 0), (-1, 1),
         (0, -1), (0, 1),
         (1, -1), (1, 0), (1, 1),
     ]
-    diffs = _.map_(cells, lambda other: (other[0] - origin[0], other[1] - origin[1]))
+    diffs = py_.map_(cells, lambda other: (other[0] - origin[0], other[1] - origin[1]))
 
-    adjacent = _.filter_(
-        _.zip_(cells, diffs),
+    adjacent = py_.filter_(
+        py_.zip_(cells, diffs),
         lambda pair: pair[1] in adjacent_square,
-
     )
 
-    return _.map_(adjacent, 0)
+    return py_.map_(adjacent, 0)
 
 
-def find_adjacent_cells_recursive(origin, cells):
+def find_adjacent_cells_recursive(origin: Coord, cells: List[Coord]) -> List[Coord]:
     selected = [origin]
     while True:
         current_selected = []
@@ -48,7 +58,7 @@ def find_adjacent_cells_recursive(origin, cells):
     return sorted(selected)
 
 
-def find_ships(field):
+def find_ships(field: MatrixInt):
     found_ships = []
     cells = find_checked_cells(field)
     while cells:
@@ -60,7 +70,7 @@ def find_ships(field):
     return found_ships
 
 
-def check_ship_shape(ship):
+def check_ship_shape(ship: WeakShip):
     """
     Проверяет форму корабля
     :param ship: Список клеток корабля
@@ -76,7 +86,7 @@ def check_ship_shape(ship):
     return len(common_increment) == 1 and common_increment[0] in [(0, 1), (1, 0)]
 
 
-def check_fleet_config(fleet, is_setup_stage=False):
+def check_fleet_config(fleet: Any, is_setup_stage=False) -> Tuple[bool, Optional[Dict[int, int]]]:
     """
     Проверяет конфигурацию флота (1 4палубный, 2 3палубных итд)
     :param fleet: список кораблей
@@ -95,8 +105,8 @@ def check_fleet_config(fleet, is_setup_stage=False):
 
     # Checking for extra ships
     configs = zip_by_keys((config, SHIP_CONFIG), 0)
-    diff = _.map_values(configs, lambda counts: counts[1] - counts[0])
-    extra_ships = any(_.map_(list(diff.values()), lambda x: x < 0))
+    diff = py_.map_values(configs, lambda counts: counts[1] - counts[0])
+    extra_ships = any(py_.map_(list(diff.values()), lambda x: x < 0))
     if extra_ships:
         return False, None
 
@@ -105,8 +115,7 @@ def check_fleet_config(fleet, is_setup_stage=False):
         return is_setup_stage, missing_ships
 
 
-
-def check_ship_bounds(ship):
+def check_ship_bounds(ship: List[Coord]):
     """
     Проверяет, что корабль внутри поля
     :param ship: Список клеток корабля
@@ -118,7 +127,7 @@ def check_ship_bounds(ship):
     )
 
 
-def validate_field(field, is_setup_stage=False):
+def validate_field(field: MatrixInt, is_setup_stage: bool=False):
     """
     Проверяет поле на ошибки
     :param field: 2d список клеток

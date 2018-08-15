@@ -1,72 +1,23 @@
-from configs.cell_state import CellState
-from check_field import validate_field, check_fleet_config, find_ships
-from configs.response import Response
-from configs.rules import FIELD_DIMENSIONS
+from typing import List, Optional
 
-
-def make_field(opponent=False):
-    field = []
-    initial = CellState.CELL_FOG if opponent else CellState.CELL_EMPTY
-    for i in range(FIELD_DIMENSIONS[0]):
-        field.append([initial.value] * FIELD_DIMENSIONS[1])
-    return field
-
-
-def load_field(field, player_name):
-    ships = find_ships(field)
-    return Field(ships, player_name)
-
-
-class Ship:
-    def __init__(self, cells):
-        self.cells = cells
-        self.state = [CellState.CELL_DECK] * len(cells)
-
-    def __len__(self):
-        return len(self.cells)
-
-    def get_cell(self, cell):
-        return self.state[self.cells.index(cell)]
-
-    def hit(self, cell):
-        self.state[self.cells.index(cell)] = CellState.CELL_DECK_DEAD
-
-        return self
-
-    def get_view(self):
-        return zip(self.cells, self.state)
-
-    def is_dead(self):
-        return all(map(lambda state: state == CellState.CELL_DECK_DEAD, self.state))
-
-    def all_adjacent_cells(self):
-        adjacent_square = [
-            (-1, -1), (-1, 0), (-1, 1),
-            (0, -1), (0, 1),
-            (1, -1), (1, 0), (1, 1),
-        ]
-        all_adjacent_cells = []
-        for cell in self.cells:
-            for adj in adjacent_square:
-                new_adj = (cell[0] + adj[0], cell[1] + adj[1])
-                if new_adj not in all_adjacent_cells and new_adj not in self.cells:
-                    all_adjacent_cells.append(new_adj)
-
-        return all_adjacent_cells
+from check_field import validate_field, find_ships
+from configs import CellState, Response, FIELD_DIMENSIONS
+from my_types.coord import Coord
+from my_types.weak_ship import WeakShip
+from ship import Ship
 
 
 class Field:
-    def __init__(self, fleet=None, player_name=''):
+    def __init__(self, fleet: Optional[List[WeakShip]]=None, player_name='') -> None:
         self.player_name = player_name
         if fleet is None:
             fleet = []
-
         if fleet and type(fleet[0]) is list:
             fleet = list(map(Ship, fleet))
         self.fleet = fleet
         self.exposedCells = set()
 
-    def add_fleet(self, ship):
+    def add_fleet(self, ship: WeakShip):
         new_fleet = self.fleet + [Ship(ship)]
         f = Field(fleet=new_fleet, player_name=self.player_name)
         try:
@@ -75,7 +26,7 @@ class Field:
         except AssertionError as x:
             raise BaseException('field is incorrect', x, ship)
 
-    def lookup_ship(self, cell):
+    def lookup_ship(self, cell: Coord):
         """
         Ищет корабль по клетке
         :param cell: (i, j)
@@ -86,10 +37,10 @@ class Field:
                 return ship
         return None
 
-    def is_dead(self):
+    def is_dead(self) -> bool:
         return all(map(lambda ship: ship.is_dead(), self.fleet))
 
-    def hit(self, cell):
+    def hit(self, cell: Coord) -> Response:
         if cell in self.exposedCells:
             return Response.REPEAT
         self.exposedCells.add(cell)
@@ -138,3 +89,16 @@ class Field:
                         view[i][j] = CellState.CELL_EMPTY.value
 
         return view
+
+
+def make_field(opponent=False) -> List[List[int]]:
+    field = []
+    initial = CellState.CELL_FOG if opponent else CellState.CELL_EMPTY
+    for i in range(FIELD_DIMENSIONS[0]):
+        field.append([initial.value] * FIELD_DIMENSIONS[1])
+    return field
+
+
+def load_field(field: List[List[int]], player_name: str) -> Field:
+    ships = find_ships(field)
+    return Field(ships, player_name)

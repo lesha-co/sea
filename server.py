@@ -1,16 +1,11 @@
-from enum import Enum
-import pydash as _
-
-import ui
-from configs.locale import Locale
-from configs.response import Response
-from configs.theme import Theme
 from field import load_field
+from ui import make_ship_from_str, micro_draw
+from configs import Response, Theme, Locale
 
 
 class Server:
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Создает два пустых поля
         """
         player_a_name = input('Игрок А, ваше имя >')
@@ -47,10 +42,10 @@ class Server:
         target_field = field_b
 
         while True:
-            print(ui.micro_draw(target_field, current_field, locale=locale, theme=theme, border=border))
+            print(micro_draw(target_field, current_field, locale=locale, theme=theme, border=border))
             print('{}, ваш ход!'.format(current_field.player_name))
             try:
-                move = ui.make_ship_from_str(input('>'), locale)
+                move = make_ship_from_str(input('>'), locale)
                 assert len(move) == 1
                 move = move[0]
                 response = target_field.hit(move)
@@ -60,12 +55,10 @@ class Server:
                 if response == Response.LOST:
                     print('Игрок {} выиграл бой!'.format(current_field.player_name))
                     break
-            except Exception:
+            except AssertionError:
                 print('Некорректный ввод!')
 
-
-
-        #field_a = ui.input_field("A", Locale.EN, Theme.MAIN)
+        # field_a = ui.input_field("A", Locale.EN, Theme.MAIN)
 
 
 if __name__ == '__main__':

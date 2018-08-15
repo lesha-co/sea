@@ -1,4 +1,4 @@
-from .cell_state import CellState
+from . import CellState
 from enum import Enum
 
 

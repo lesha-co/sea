@@ -1,16 +1,17 @@
-import unittest
-import check_field
-from configs.cell_state import CellState
+from unittest import TestCase, main
+from check_field import find_checked_cells, find_ships, find_adjacent_cells,\
+                        validate_field, check_ship_shape, check_fleet_config
+from configs import CellState
 
 
-class FieldValidatorTestCase(unittest.TestCase):
+class FieldValidatorTestCase(TestCase):
 
-    def test_cell_state(self):
+    def test_cell_state(self) -> None:
         self.assertEqual(CellState.CELL_DECK.value, 2)
         self.assertEqual(CellState.CELL_EMPTY.value, 1)
         self.assertEqual(CellState.CELL_FOG.value, 0)
 
-    def test_find_checked_cells(self):
+    def test_find_checked_cells(self) -> None:
         field = [
             [1, 2, 2, 1],
             [1, 1, 1, 1],
@@ -18,11 +19,11 @@ class FieldValidatorTestCase(unittest.TestCase):
             [1, 1, 1, 1],
         ]
         self.assertEqual(
-            check_field.find_checked_cells(field),
+            find_checked_cells(field),
             [(0, 1), (0, 2), (2, 0), (2, 1), (2, 2), (2, 3)]
         )
 
-    def test_find_ships(self):
+    def test_find_ships(self) -> None:
         field = [
             [1, 2, 2, 1, 1],
             [1, 1, 1, 1, 2],
@@ -31,31 +32,31 @@ class FieldValidatorTestCase(unittest.TestCase):
             [1, 1, 1, 1, 2],
         ]
         self.assertEqual(
-            check_field.find_ships(field), [
+            find_ships(field), [
                 [(0, 1), (0, 2)],
                 [(1, 4), (2, 0), (2, 1), (2, 2), (2, 3), (3, 2)],
                 [(4, 4)]
             ]
         )
 
-    def test_find_adjacent_cells(self):
+    def test_find_adjacent_cells(self) -> None:
         cells = [(2, 2), (2, 3), (2, 1), (1, 2), (3, 2), (3, 3), (0, 0)]
-        self.assertEqual(check_field.find_adjacent_cells(cells[0], cells), [
+        self.assertEqual(find_adjacent_cells(cells[0], cells), [
             (2, 3), (2, 1), (1, 2), (3, 2), (3, 3)
         ])
 
-    def test_check_ship_shape(self):
+    def test_check_ship_shape(self) -> None:
         ships = [
             [(1, 4), (2, 0), (2, 1), (2, 2), (2, 3), (3, 2)],
             [(0, 1), (0, 2)],
             [(4, 4)]
         ]
-        tests = list(map(check_field.check_ship_shape, ships))
+        tests = list(map(check_ship_shape, ships))
         self.assertEqual(tests, [False, True, True])
 
 
-class FieldValidator(unittest.TestCase):
-    def test_validate_field_ok(self):
+class FieldValidator(TestCase):
+    def test_validate_field_ok(self) -> None:
         field_ok = [
             [1, 2, 1, 1, 1, 1, 1, 1, 1, 2],
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -68,9 +69,9 @@ class FieldValidator(unittest.TestCase):
             [1, 1, 1, 1, 2, 1, 1, 1, 2, 2],
             [1, 2, 1, 1, 1, 1, 1, 1, 1, 1],
         ]
-        self.assertTrue(check_field.validate_field(field_ok))
+        self.assertTrue(validate_field(field_ok))
 
-    def test_validate_field_colliding_ships(self):
+    def test_validate_field_colliding_ships(self) -> None:
         field_colliding_ships = [
             [1, 2, 1, 1, 1, 1, 1, 1, 1, 2],
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -85,11 +86,11 @@ class FieldValidator(unittest.TestCase):
         ]
 
         with self.assertRaises(Exception) as ctx:
-            check_field.validate_field(field_colliding_ships)
+            validate_field(field_colliding_ships)
 
         self.assertEqual(ctx.exception.args[0], 'Fleet config is invalid (ships are touching or extra/missing ship)')
 
-    def test_validate_field_wrong_shape(self):
+    def test_validate_field_wrong_shape(self) -> None:
         field_wrong_shape = [
             [1, 2, 1, 1, 1, 1, 1, 1, 1, 2],
             [1, 1, 1, 1, 1, 1, 2, 1, 1, 1],
@@ -104,12 +105,12 @@ class FieldValidator(unittest.TestCase):
         ]
 
         with self.assertRaises(Exception) as ctx:
-            check_field.validate_field(field_wrong_shape)
+            validate_field(field_wrong_shape)
 
         self.assertEqual(ctx.exception.args[0],
                          'There is a deformed ship somewhere on the field ([(1, 6), (2, 4), (2, 5), (2, 6)])')
 
-    def test_validate_field_extra_ship(self):
+    def test_validate_field_extra_ship(self) -> None:
         field_extra_ship = [
             [1, 2, 1, 1, 1, 2, 1, 1, 1, 2],
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -124,11 +125,11 @@ class FieldValidator(unittest.TestCase):
         ]
 
         with self.assertRaises(Exception) as ctx:
-            check_field.validate_field(field_extra_ship)
+            validate_field(field_extra_ship)
 
         self.assertEqual(ctx.exception.args[0], 'Fleet config is invalid (ships are touching or extra/missing ship)')
 
-    def test_validate_field_out_of_bounds(self):
+    def test_validate_field_out_of_bounds(self) -> None:
         field_ship_outside_bounds = [
             [1, 2, 1, 1, 1, 2, 1, 1, 1, 2],
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -144,25 +145,25 @@ class FieldValidator(unittest.TestCase):
         ]
 
         with self.assertRaises(Exception) as ctx:
-            check_field.validate_field(field_ship_outside_bounds)
+            validate_field(field_ship_outside_bounds)
 
         self.assertEqual(ctx.exception.args[0],
                          'Ship outside bounds ([(10, 1)])')
 
 
-class FleetConfigValidator(unittest.TestCase):
-    def test_check_fleet_config_ok(self):
-        self.assertTrue(check_field.check_fleet_config([
+class FleetConfigValidator(TestCase):
+    def test_check_fleet_config_ok(self) -> None:
+        self.assertTrue(check_fleet_config([
             [1, 2, 3, 4],
             [1, 2, 3], [1, 2, 3],
             [1, 2], [1, 2], [1, 2],
             [1], [1], [1], [1],
         ]))
 
-    def test_check_fleet_config_extra_ship(self):
+    def test_check_fleet_config_extra_ship(self) -> None:
         self.assertEqual(
             (False, None),
-            check_field.check_fleet_config([
+            check_fleet_config([
                 [1, 2, 3, 4], [1, 2, 3, 4],
                 [1, 2, 3], [1, 2, 3],
                 [1, 2], [1, 2], [1, 2],
@@ -170,30 +171,30 @@ class FleetConfigValidator(unittest.TestCase):
             ])
         )
 
-    def test_check_fleet_config_missing_ship(self):
+    def test_check_fleet_config_missing_ship(self) -> None:
         self.assertEqual(
             (False, {4: 1}),
-            check_field.check_fleet_config([
+            check_fleet_config([
                 [1, 2, 3], [1, 2, 3],
                 [1, 2], [1, 2], [1, 2],
                 [1], [1], [1], [1],
             ])
         )
 
-    def test_check_fleet_config_setup_stage_missing_all_ships_of_type(self):
+    def test_check_fleet_config_setup_stage_missing_all_ships_of_type(self) -> None:
         self.assertEqual(
             (True, {4: 1}),
-            check_field.check_fleet_config([
+            check_fleet_config([
                 [1, 2, 3], [1, 2, 3],
                 [1, 2], [1, 2], [1, 2],
                 [1], [1], [1], [1],
             ], is_setup_stage=True)
         )
 
-    def test_check_fleet_config_setup_stage_missing_ship(self):
+    def test_check_fleet_config_setup_stage_missing_ship(self) -> None:
         self.assertEqual(
             (True, {1: 1}),
-            check_field.check_fleet_config([
+            check_fleet_config([
                 [1, 2, 3, 4],
                 [1, 2, 3], [1, 2, 3],
                 [1, 2], [1, 2], [1, 2],
@@ -201,10 +202,10 @@ class FleetConfigValidator(unittest.TestCase):
             ], is_setup_stage=True),
         )
 
-    def test_check_fleet_config_setup_stage_extra_ship(self):
+    def test_check_fleet_config_setup_stage_extra_ship(self) -> None:
         self.assertEqual(
             (False, None),
-            check_field.check_fleet_config([
+            check_fleet_config([
                 [1, 2, 3, 4], [1, 2, 3, 4],
                 [1, 2, 3], [1, 2, 3],
                 [1, 2], [1, 2], [1, 2],
@@ -214,4 +215,4 @@ class FleetConfigValidator(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    main()

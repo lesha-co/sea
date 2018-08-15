@@ -1,32 +1,29 @@
-import pydash as _
+from pydash import py_
 
 from check_field import check_fleet_config
-from configs.cell_state import CellState
-from configs.locale import Locale
-from configs.theme import Theme
-from configs.rules import FIELD_DIMENSIONS
+from configs import CellState, Locale, Theme, FIELD_DIMENSIONS
 from field import Field
-import re
+from re import findall
 
 CELL_WIDTH = 3
 
 
-def micro_draw(target_field, current_field, **kwargs):
+def micro_draw(target_field: Field, current_field: Field, **kwargs) -> str:
     draw_left = draw_field(target_field, numbers_right=False, opponent=True, **kwargs).split('\n')
     draw_right = draw_field(current_field, numbers_right=True, opponent=False, **kwargs).split('\n')
 
-    lines = _.zip_(draw_left, draw_right)
-    combo_lines = _.map_(lines, lambda pair: ' : '.join(pair))
+    lines = py_.zip_(draw_left, draw_right)
+    combo_lines = py_.map_(lines, lambda pair: ' : '.join(pair))
     return '\n'.join(combo_lines)
 
 
-def draw_field(field: Field, locale: Locale, theme: Theme,
+def draw_field(fld: Field, locale: Locale, theme: Theme,
                numbers_right: bool = False,
                opponent: bool = False,
                border: bool = False,
                contours: bool = False):
-    header = _.chain(locale.value).map_(lambda x: "{: ^{}}".format(x, CELL_WIDTH)).join().value()
-    name_header = '{:<{}}'.format(field.player_name, CELL_WIDTH*len(locale.value))
+    header = py_.chain(locale.value).map_(lambda x: "{: ^{}}".format(x, CELL_WIDTH)).join().value()
+    name_header = '{:<{}}'.format(fld.player_name, CELL_WIDTH*len(locale.value))
     if numbers_right:
         name_header = ' '.join([name_header, ' ' * CELL_WIDTH])
         header = ' '.join([header, ' ' * CELL_WIDTH])
@@ -47,17 +44,17 @@ def draw_field(field: Field, locale: Locale, theme: Theme,
             header = '  ' + header
             name_header = '  ' + name_header
 
-    view = field.get_view(opponent, contours)
-    raw_rows = _.map_(view, lambda row: _.chain(row).map_(theme.value.get).join().value())
+    view = fld.get_view(opponent, contours)
+    raw_rows = py_.map_(view, lambda row: py_.chain(row).map_(theme.value.get).join().value())
     line_numbers_fmt = '{{: {}{}}}'.format('<' if numbers_right else '>', CELL_WIDTH)
-    line_numbers = _.map_(
+    line_numbers = py_.map_(
         list(range(1, FIELD_DIMENSIONS[0] + 1)),
         line_numbers_fmt.format
     )
     if numbers_right:
-        columns = _.zip_(raw_rows, line_numbers)
+        columns = py_.zip_(raw_rows, line_numbers)
     else:
-        columns = _.zip_(line_numbers, raw_rows)
+        columns = py_.zip_(line_numbers, raw_rows)
 
     column_separator = ' '
     if border:
@@ -65,9 +62,9 @@ def draw_field(field: Field, locale: Locale, theme: Theme,
     lines = [name_header, header]
     if border:
         lines.append(sub_header)
-    lines += _.map_(columns, column_separator.join)
+    lines += py_.map_(columns, column_separator.join)
 
-    return _.join(lines, '\n')
+    return py_.join(lines, '\n')
 
 
 def to_cell_coordinates(item, locale: Locale):
@@ -85,11 +82,11 @@ def make_ship_from_str(string: str, locale: Locale):
     
     alpha = locale.value
     pattern = r'^([{}])(\d+)(?:([{}])(\d+))?$'.format(alpha, alpha)
-    findings = re.findall(pattern, string)
+    findings = findall(pattern, string)
     if not findings:
         raise Exception('Incorrect input')
 
-    ship = _.map_(findings[0], lambda item: to_cell_coordinates(item, locale))
+    ship = py_.map_(findings[0], lambda item: to_cell_coordinates(item, locale))
     if ship[2] is None:
         # single deck ship
         assert 0 <= ship[1] < FIELD_DIMENSIONS[0], 'Incorrect Input'
@@ -104,7 +101,7 @@ def make_ship_from_str(string: str, locale: Locale):
 
         start = [ship[1], ship[0]]
         finish = [ship[3], ship[2]]
-        diff = _.chain(_.zip_(start, finish)).map_(lambda x: x[1] - x[0]).value()
+        diff = py_.chain(py_.zip_(start, finish)).map_(lambda x: x[1] - x[0]).value()
         if diff[0] and diff[1]:
             raise Exception('Ship should be a straight line')
 
@@ -124,10 +121,10 @@ def make_ship_from_str(string: str, locale: Locale):
         return ship
 
 
-def draw_slots(diff, theme:Theme):
+def draw_slots(diff, theme: Theme):
     keys = sorted(diff.keys())
     tile = theme.value[CellState.CELL_DECK.value]
-    strings = _.map_(keys, lambda key: '{} ×{}'.format(tile*key, diff[key]))
+    strings = py_.map_(keys, lambda key: '{} ×{}'.format(tile*key, diff[key]))
     return ' '.join(strings)
 
 
