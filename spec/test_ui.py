@@ -1,7 +1,7 @@
 from unittest import TestCase, main
 from pydash import py_
 
-from configs import Locale, Theme
+from config import Locale, Theme
 from field import Field
 from ui import draw_field, make_ship_from_str
 
@@ -102,13 +102,13 @@ class MakeShipFromStrTestCase(TestCase):
         )
 
     def test_incorrect_ru(self) -> None:
-        with self.assertRaises(Exception) as ctx:
+        with self.assertRaises(AssertionError) as ctx:
             make_ship_from_str("Г1Г2Г3", Locale.RU)
 
         self.assertEqual(ctx.exception.args[0], 'Incorrect input')
 
     def test_incorrect_locale(self) -> None:
-        with self.assertRaises(Exception) as ctx:
+        with self.assertRaises(AssertionError) as ctx:
             make_ship_from_str("Г1Г2", Locale.EN)
 
         self.assertEqual(ctx.exception.args[0], 'Incorrect input')

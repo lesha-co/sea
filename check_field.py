@@ -3,8 +3,8 @@ from typing import List, Optional, Tuple, Dict, Any
 
 from pydash import py_
 
-from configs import CellState, SHIP_CONFIG, FIELD_DIMENSIONS
-from helpers import zip_by_keys
+from config import CellState, SHIP_CONFIG, FIELD_DIMENSIONS
+from helpers import group_by_keys
 from my_types.coord import Coord
 from my_types.matrix_int import MatrixInt
 from my_types.weak_ship import WeakShip
@@ -104,7 +104,7 @@ def check_fleet_config(fleet: Any, is_setup_stage=False) -> Tuple[bool, Optional
         return True, None
 
     # Checking for extra ships
-    configs = zip_by_keys((config, SHIP_CONFIG), 0)
+    configs = group_by_keys((config, SHIP_CONFIG), 0)
     diff = py_.map_values(configs, lambda counts: counts[1] - counts[0])
     extra_ships = any(py_.map_(list(diff.values()), lambda x: x < 0))
     if extra_ships:

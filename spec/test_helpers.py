@@ -1,5 +1,5 @@
 from unittest import TestCase, main
-from helpers import zip_by_keys
+from helpers import group_by_keys
 
 
 class MyTestCase(TestCase):
@@ -15,7 +15,7 @@ class MyTestCase(TestCase):
             "c": [3, 30, 300]
         }
         self.assertEqual(
-            zip_by_keys(dicts),
+            group_by_keys(dicts),
             expected
         )
 
@@ -31,7 +31,7 @@ class MyTestCase(TestCase):
             "c": [None, 30, 300]
         }
         self.assertEqual(
-            zip_by_keys(dicts),
+            group_by_keys(dicts),
             expected
         )
 

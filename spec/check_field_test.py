@@ -1,7 +1,7 @@
 from unittest import TestCase, main
 from check_field import find_checked_cells, find_ships, find_adjacent_cells,\
                         validate_field, check_ship_shape, check_fleet_config
-from configs import CellState
+from config import CellState
 
 
 class FieldValidatorTestCase(TestCase):

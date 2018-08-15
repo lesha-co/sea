@@ -1,7 +1,7 @@
 from pydash import py_
 
 from check_field import check_fleet_config
-from configs import CellState, Locale, Theme, FIELD_DIMENSIONS
+from config import CellState, Locale, Theme, FIELD_DIMENSIONS
 from field import Field
 from re import findall
 
@@ -83,21 +83,20 @@ def make_ship_from_str(string: str, locale: Locale):
     alpha = locale.value
     pattern = r'^([{}])(\d+)(?:([{}])(\d+))?$'.format(alpha, alpha)
     findings = findall(pattern, string)
-    if not findings:
-        raise Exception('Incorrect input')
+    assert findings, 'Incorrect input'
 
     ship = py_.map_(findings[0], lambda item: to_cell_coordinates(item, locale))
     if ship[2] is None:
         # single deck ship
-        assert 0 <= ship[1] < FIELD_DIMENSIONS[0], 'Incorrect Input'
-        assert 0 <= ship[0] < FIELD_DIMENSIONS[1], 'Incorrect Input'
+        assert 0 <= ship[1] < FIELD_DIMENSIONS[0], 'Incorrect input'
+        assert 0 <= ship[0] < FIELD_DIMENSIONS[1], 'Incorrect input'
         return [(ship[1], ship[0])]
 
     else:
-        assert 0 <= ship[1] < FIELD_DIMENSIONS[0], 'Incorrect Input'
-        assert 0 <= ship[0] < FIELD_DIMENSIONS[1], 'Incorrect Input'
-        assert 0 <= ship[3] < FIELD_DIMENSIONS[0], 'Incorrect Input'
-        assert 0 <= ship[2] < FIELD_DIMENSIONS[1], 'Incorrect Input'
+        assert 0 <= ship[1] < FIELD_DIMENSIONS[0], 'Incorrect input'
+        assert 0 <= ship[0] < FIELD_DIMENSIONS[1], 'Incorrect input'
+        assert 0 <= ship[3] < FIELD_DIMENSIONS[0], 'Incorrect input'
+        assert 0 <= ship[2] < FIELD_DIMENSIONS[1], 'Incorrect input'
 
         start = [ship[1], ship[0]]
         finish = [ship[3], ship[2]]

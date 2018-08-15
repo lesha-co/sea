@@ -1,6 +1,6 @@
 from typing import List, Iterator, Tuple
 
-from configs import CellState
+from config import CellState
 from my_types.coord import Coord
 
 

@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from check_field import validate_field, find_ships
-from configs import CellState, Response, FIELD_DIMENSIONS
+from config import CellState, Response, FIELD_DIMENSIONS
 from my_types.coord import Coord
 from my_types.weak_ship import WeakShip
 from ship import Ship
@@ -66,7 +66,7 @@ class Field:
         :param draw_contours: показывать клетки, где запрещено ставить корабли (только если opponent=False)
         :return: 2д список (0)
         """
-        view = make_field(opponent)
+        view = Field.make_field(opponent)
         draw_contours = draw_contours and not opponent
         contours = set()
         if draw_contours:
@@ -90,15 +90,16 @@ class Field:
 
         return view
 
+    @staticmethod
+    def make_field(opponent=False) -> List[List[int]]:
+        field = []
+        initial = CellState.CELL_FOG if opponent else CellState.CELL_EMPTY
+        for i in range(FIELD_DIMENSIONS[0]):
+            field.append([initial.value] * FIELD_DIMENSIONS[1])
+        return field
 
-def make_field(opponent=False) -> List[List[int]]:
-    field = []
-    initial = CellState.CELL_FOG if opponent else CellState.CELL_EMPTY
-    for i in range(FIELD_DIMENSIONS[0]):
-        field.append([initial.value] * FIELD_DIMENSIONS[1])
-    return field
+    @staticmethod
+    def load_field(field: List[List[int]], player_name: str) -> 'Field':
+        return Field(find_ships(field), player_name)
 
 
-def load_field(field: List[List[int]], player_name: str) -> Field:
-    ships = find_ships(field)
-    return Field(ships, player_name)

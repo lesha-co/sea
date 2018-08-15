@@ -1,64 +1,40 @@
-from field import load_field
-from ui import make_ship_from_str, micro_draw
-from configs import Response, Theme, Locale
+from clients import ConsoleClient, BotClient
+from config import Response, Theme, Locale
 
 
 class Server:
 
     def __init__(self) -> None:
-        """Создает два пустых поля
-        """
-        player_a_name = input('Игрок А, ваше имя >')
-        field_a = load_field([
-            [1, 2, 1, 1, 1, 1, 1, 1, 1, 2],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 2, 2, 2, 2, 1, 1],
-            [1, 1, 2, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 2, 1, 2, 2, 1, 1, 1, 1],
-            [1, 1, 2, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 2, 1, 2, 2, 1, 1],
-            [1, 2, 1, 1, 2, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 2, 1, 1, 1, 2, 2],
-            [1, 2, 1, 1, 1, 1, 1, 1, 1, 1],
-        ], player_a_name)
-        player_b_name = input('Игрок Б, ваше имя >')
-        field_b = load_field([
-            [1, 2, 1, 1, 1, 1, 1, 1, 1, 2],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 2, 2, 2, 2, 1, 1],
-            [1, 1, 2, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 2, 1, 2, 2, 1, 1, 1, 1],
-            [1, 1, 2, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 2, 1, 2, 2, 1, 1],
-            [1, 2, 1, 1, 2, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 2, 1, 1, 1, 2, 2],
-            [1, 2, 1, 1, 1, 1, 1, 1, 1, 1],
-        ], player_b_name)
-        locale = Locale.RU
-        theme = Theme.MAIN
-        border = True
+        player_a = ConsoleClient(Locale.RU, Theme.MAIN, border=True, client_id='Кожаный мешок')
+        player_b = BotClient(client_id='Робот')
 
-        current_field = field_a
-        target_field = field_b
+        current_player = player_a
+        target_player = player_b
 
         while True:
-            print(micro_draw(target_field, current_field, locale=locale, theme=theme, border=border))
-            print('{}, ваш ход!'.format(current_field.player_name))
-            try:
-                move = make_ship_from_str(input('>'), locale)
-                assert len(move) == 1
-                move = move[0]
-                response = target_field.hit(move)
-                print('{}!'.format(response.value))
-                if response == Response.MISS:
-                    current_field, target_field = target_field, current_field
-                if response == Response.LOST:
-                    print('Игрок {} выиграл бой!'.format(current_field.player_name))
-                    break
-            except AssertionError:
-                print('Некорректный ввод!')
+            # Запрашиваем у текущего игрока ход:
+            move = current_player.request_move(
+                current_player.field,
+                # это раскрывает поле игрока для противника, но мы честные люди и
+                # будем использовать его только для отрисовки в режиме оппонента:
+                target_player.field
+            )
 
-        # field_a = ui.input_field("A", Locale.EN, Theme.MAIN)
+            # стреляем в поле противника
+            response = target_player.field.hit(move)
+
+            # показываем игроку ответ
+            current_player.message(str(response.value))
+
+            # обновляем состояние игры
+            if response == Response.MISS:
+                # меняем игроков местами
+                current_player, target_player = target_player, current_player
+            if response == Response.LOST:
+                # оповещаем игроков о конце игры
+                current_player.message('Вы выиграли!')
+                target_player.message('Вы проиграли!')
+                break
 
 
 if __name__ == '__main__':
