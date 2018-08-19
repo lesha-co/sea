@@ -1,4 +1,4 @@
-from unittest import TestCase, main
+from unittest import TestCase
 from field import Field
 
 
@@ -87,7 +87,3 @@ class GetViewTestCase(TestCase):
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         ])
-
-
-if __name__ == '__main__':
-    main()

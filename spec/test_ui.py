@@ -1,4 +1,4 @@
-from unittest import TestCase, main
+from unittest import TestCase
 from pydash import py_
 
 from config import Locale, Theme
@@ -126,7 +126,3 @@ class MakeShipFromStrTestCase(TestCase):
     def test_out_of_bounds_2(self) -> None:
         with self.assertRaises(Exception):
             make_ship_from_str("А9А11", Locale.RU)
-
-
-if __name__ == '__main__':
-    main()

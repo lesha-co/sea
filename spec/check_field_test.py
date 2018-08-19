@@ -1,4 +1,4 @@
-from unittest import TestCase, main
+from unittest import TestCase
 
 from check_field import find_checked_cells, find_ships, find_adjacent_cells, \
     validate_field, check_ship_shape, check_fleet_config, get_available_cells, \
@@ -288,7 +288,3 @@ class FindStraightSegmentsValidator(TestCase):
                 vertical=True
             )
         )
-
-
-if __name__ == '__main__':
-    main()

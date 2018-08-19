@@ -1,4 +1,4 @@
-from unittest import TestCase, main
+from unittest import TestCase
 from helpers import group_by_keys
 
 
@@ -34,7 +34,3 @@ class MyTestCase(TestCase):
             group_by_keys(dicts),
             expected
         )
-
-
-if __name__ == '__main__':
-    main()
