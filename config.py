@@ -14,7 +14,6 @@ class Locale(Enum):
     RU = "АБВГДЕЖЗИК"
     EN = "ABCDEFGHIJ"
 
-
 class Response(Enum):
     MISS = 'Мимо!'
     HIT = 'Попадение!'

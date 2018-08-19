@@ -143,3 +143,15 @@ class Field:
             new_field[i][j] = CellState.CELL_DECK.value
 
         return new_field
+
+
+if __name__ == '__main__':
+    from ui import draw_field
+    from config import Locale, Theme
+    print(draw_field(
+        Field.generate_random_field('== DEMO RUN =='),
+        Locale.EN,
+        Theme.MAIN,
+        border=True,
+        contours=True
+    ))

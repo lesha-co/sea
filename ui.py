@@ -8,9 +8,10 @@ from re import findall
 CELL_WIDTH = 3
 
 
-def micro_draw(target_field: Field, current_field: Field, **kwargs) -> str:
+def micro_draw(target_field: Field, current_field: Field, expose_opponent=False, **kwargs) -> str:
+
     draw_left = draw_field(target_field, numbers_right=False, opponent=True, **kwargs).split('\n')
-    draw_right = draw_field(current_field, numbers_right=True, opponent=False, **kwargs).split('\n')
+    draw_right = draw_field(current_field, numbers_right=True, opponent=expose_opponent, **kwargs).split('\n')
 
     lines = py_.zip_(draw_left, draw_right)
     combo_lines = py_.map_(lines, lambda pair: ' : '.join(pair))

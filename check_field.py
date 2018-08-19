@@ -11,6 +11,10 @@ from my_types.matrix_int import MatrixInt
 from my_types.weak_ship import WeakShip
 
 
+def inc(a: Coord, b: Coord) -> Coord:
+    return a[0] + b[0], a[1] + b[1]
+
+
 def get_available_cells(field: MatrixInt, dimensions: Coord) -> List[Coord]:
     checked = find_checked_cells(field)
     all_cells = list(product(range(dimensions[0]), range(dimensions[1])))
@@ -19,9 +23,6 @@ def get_available_cells(field: MatrixInt, dimensions: Coord) -> List[Coord]:
 
 
 def find_straight_segments(cells: List[Coord], vertical: bool = False) -> List[List[Coord]]:
-
-    def inc(a: Coord, b: Coord) -> Coord:
-        return a[0] + b[0], a[1] + b[1]
 
     groups = []
     sorted_cells = sorted(cells)
@@ -44,13 +45,14 @@ def find_checked_cells(field: MatrixInt):
         (i, j)
         for i, row in enumerate(field)
         for j, cell in enumerate(row)
-        if cell == CellState.CELL_DECK.value
+        if cell in [CellState.CELL_DECK.value, CellState.CELL_DECK_DEAD.value]
     ]
 
 
-def find_adjacent_cells(origin: Coord, cells: List[Coord]) -> List[Coord]:
+def find_adjacent_cells(origin: Coord, cells: List[Coord], only_orthogonal: bool = False) -> List[Coord]:
     """
     Находит соседние клетки от origin среди cells
+    :param only_orthogonal:
     :param origin:
     :param cells:
     :return:
@@ -60,11 +62,16 @@ def find_adjacent_cells(origin: Coord, cells: List[Coord]) -> List[Coord]:
         (0, -1), (0, 1),
         (1, -1), (1, 0), (1, 1),
     ]
+    ortho = [(-1, 0), (0, -1), (0, 1), (1, 0)]
+
+    chosen_nearness = ortho if only_orthogonal else adjacent_square
+
     diffs = py_.map_(cells, lambda other: (other[0] - origin[0], other[1] - origin[1]))
+
 
     adjacent = py_.filter_(
         py_.zip_(cells, diffs),
-        lambda pair: pair[1] in adjacent_square,
+        lambda pair: pair[1] in chosen_nearness,
     )
 
     return py_.map_(adjacent, 0)
@@ -156,7 +163,7 @@ def check_ship_bounds(ship: List[Coord]):
     )
 
 
-def validate_field(field: MatrixInt, is_setup_stage: bool=False):
+def validate_field(field: MatrixInt, is_setup_stage: bool = False):
     """
     Проверяет поле на ошибки
     :param field: 2d список клеток

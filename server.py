@@ -1,12 +1,14 @@
 from clients import ConsoleClient, BotClient
 from config import Response, Theme, Locale
+from helpers import from_move
 
 
 class Server:
 
     def __init__(self) -> None:
-        player_a = ConsoleClient(Locale.RU, Theme.MAIN, border=True, client_id='Кожаный мешок')
-        player_b = BotClient(client_id='Робот')
+        locale = Locale.RU
+        player_a = ConsoleClient(locale, Theme.MAIN, border=True, client_id='Кожаный мешок')
+        player_b = BotClient(client_id='Робот', locale=locale)
 
         current_player = player_a
         target_player = player_b
@@ -23,6 +25,12 @@ class Server:
             # стреляем в поле противника
             response = target_player.field.hit(move)
 
+            # print("SERVER> Игрок {} стреляет {}. {}".format(
+            #     current_player.client_id,
+            #     from_move(move, locale),
+            #     response.name
+            # ))
+
             # показываем игроку ответ
             current_player.message(str(response.value))
 
@@ -32,8 +40,8 @@ class Server:
                 current_player, target_player = target_player, current_player
             if response == Response.LOST:
                 # оповещаем игроков о конце игры
-                current_player.message('Вы выиграли!')
-                target_player.message('Вы проиграли!')
+                current_player.conclude('Вы выиграли!', current_player.field, target_player.field)
+                target_player.conclude('Вы проиграли!', target_player.field, current_player.field )
                 break
 
 

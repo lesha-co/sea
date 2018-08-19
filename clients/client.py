@@ -42,3 +42,6 @@ class Client:
         :return:
         """
         pass
+
+    def conclude(self, message: str, my_field: Field, opponent_field: Field):
+        return self.message(message)
