@@ -5,7 +5,7 @@ from typing import List
 import pydash as py_
 
 from check_field import find_adjacent_cells, find_ships, inc
-from config import Locale, Theme, FIELD_DIMENSIONS, CellState
+from config import Locale, Theme, CellState
 from field import Field
 from helpers import from_move
 from my_types.coord import Coord
@@ -18,7 +18,7 @@ def diff(one: Coord, other: Coord) -> Coord:
 
 def calculate_ship_extension(ship: List[Coord], candidates: List[Coord]) -> List[Coord]:
     if len(ship) == 1:
-        return find_adjacent_cells(ship[0], candidates)
+        return find_adjacent_cells(ship[0], candidates, only_orthogonal=True)
     incr = diff(ship[0], ship[1])
     first, last = ship[0], ship[-1]
     if incr[1] == 0:  # vert
@@ -38,35 +38,27 @@ class BotClient(Client):
 
     def request_move(self, my_field: Field, opponent_field: Field) -> Coord:
         v = opponent_field.get_view(opponent=True)
+        ships = find_ships(v) # Находим все куски кораблей
 
-        exposed = [(i, j)
-                   for i, row in enumerate(v)
-                   for j, cell in enumerate(row)
-                   if cell == CellState.CELL_DECK_DEAD.value]
-
+        # Находим все пустые клетки
         empty = [(i, j)
                  for i, row in enumerate(v)
                  for j, cell in enumerate(row)
                  if cell == CellState.CELL_FOG.value]
-        ships = find_ships(v)
 
-        dumb_candidates = py_.flat_map(exposed, lambda cell: find_adjacent_cells(cell, empty, only_orthogonal=True))
+        # Для каждого куска корабля выбираем клетки, где он может продолжаться
+        candidates = py_.flat_map(ships, lambda ship: calculate_ship_extension(ship, empty))
+        print('---')
+        print('ships', ships)
+        print('Candidates', py_.map_(candidates, lambda exp: from_move(exp, self.locale)))
 
-        dumb_candidates = py_.filter_(dumb_candidates,
-                                      lambda candidate: v[candidate[0]][candidate[1]] != CellState.CELL_MISS.value)
-
-        candidates = py_.flat_map(ships, lambda ship: calculate_ship_extension(ship, dumb_candidates))
-        # print('---')
-        # print('ships', ships)
-        # print('Exposed decks', py_.map_(exposed, lambda exp: from_move(exp, self.locale)))
-        # print('Dumb Candidates', py_.map_(dumb_candidates, lambda exp: from_move(exp, self.locale)))
-        # print('Candidates', py_.map_(candidates, lambda exp: from_move(exp, self.locale)))
-
+        # Если таковые есть, стреляем наугад в них
         if candidates:
             shoot = choice(candidates)
-            # print('Using first candidate:', from_move(shoot, self.locale))
+            print('Using first candidate:', from_move(shoot, self.locale))
+        # Иначе стреляем вслепую
         else:
             shoot = choice(empty)
-            # print('Blindly shoot at:', from_move(shoot, self.locale))
-        # print('---')
+            print('Blindly shoot at:', from_move(shoot, self.locale))
+        print('---')
         return shoot
