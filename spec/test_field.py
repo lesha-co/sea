@@ -1,13 +1,15 @@
 from unittest import TestCase
-from field import Field
+
 from Coord import Coord
+from field import Field
+from ship import Ship
 
 
 class GetViewTestCase(TestCase):
     def setUp(self) -> None:
         self.field = Field([
-            [Coord((1, 1)), Coord((1, 2)), Coord((1, 3)), Coord((1, 4))],
-            [Coord((3, 1)), Coord((3, 2)), Coord((3, 3))],
+            Ship([Coord((1, 1)), Coord((1, 2)), Coord((1, 3)), Coord((1, 4))]),
+            Ship([Coord((3, 1)), Coord((3, 2)), Coord((3, 3))]),
         ])
 
     def test_view_player(self) -> None:

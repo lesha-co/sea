@@ -7,7 +7,7 @@ import pydash as py_
 from Coord import Coord
 from check_field import find_adjacent_cells, find_ships
 from config import Locale, Theme, CellState
-from my_types.matrix_int import MatrixInt
+from my_types.matrix_int import FieldView
 from .client import Client
 
 
@@ -31,12 +31,13 @@ class BotClient(Client):
     def request_name(self) -> str:
         return 'bot-{}'.format(''.join(choices(ascii_lowercase + digits, k=3)))
 
-    def request_move(self, opponent_view: MatrixInt) -> Coord:
-        ships = find_ships(opponent_view)  # Находим все куски кораблей
+    def request_move(self, opponent_view: FieldView) -> Coord:
+        v = opponent_view[1]
+        ships = find_ships(v)  # Находим все куски кораблей
 
         # Находим все пустые клетки
         empty = [Coord((i, j))
-                 for i, row in enumerate(opponent_view)
+                 for i, row in enumerate(v)
                  for j, cell in enumerate(row)
                  if cell == CellState.CELL_FOG.value]
 

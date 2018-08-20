@@ -8,6 +8,7 @@ from config import CellState, Locale, Theme, FIELD_DIMENSIONS
 from field import Field
 from my_types.matrix_int import FieldView
 from my_types.weak_ship import WeakShip
+from ship import Ship
 
 CELL_WIDTH = 3
 
@@ -95,7 +96,7 @@ def make_ship_from_str(string: str, locale: Locale) -> WeakShip:
         assert 0 <= ship[1] < FIELD_DIMENSIONS.i, 'Incorrect input'
         assert 0 <= ship[0] < FIELD_DIMENSIONS.j, 'Incorrect input'
         coord = Coord((ship[1], ship[0]))
-        return [coord]
+        return Ship([coord])
 
     else:
         assert 0 <= ship[1] < FIELD_DIMENSIONS.i, 'Incorrect input'
@@ -121,7 +122,7 @@ def make_ship_from_str(string: str, locale: Locale) -> WeakShip:
             current += increment
 
         ship.append(finish)
-        return ship
+        return Ship(ship)
 
 
 def draw_slots(diff, theme: Theme):

@@ -4,11 +4,12 @@ from typing import List, Optional, Tuple, Dict, Any
 
 import pydash as py_
 
+from Coord import Coord
 from config import CellState, SHIP_CONFIG, FIELD_DIMENSIONS
 from helpers import group_by_keys, orthogonal, adjacent_square
-from Coord import Coord
 from my_types.matrix_int import MatrixInt
 from my_types.weak_ship import WeakShip
+from ship import Ship
 
 
 def get_available_cells(field: MatrixInt, dimensions: Coord) -> List[Coord]:
@@ -79,7 +80,7 @@ def find_adjacent_cells_recursive(origin: Coord, cells: List[Coord]) -> List[Coo
     return sorted(selected)
 
 
-def find_ships(field: MatrixInt):
+def find_ships(field: MatrixInt) -> List[Ship]:
     found_ships = []
     cells = find_checked_cells(field)
     while cells:
@@ -87,7 +88,7 @@ def find_ships(field: MatrixInt):
         cells = [
             coord for coord in cells if coord not in adjacent_group
         ]
-        found_ships.append(adjacent_group)
+        found_ships.append(Ship(adjacent_group))
     return found_ships
 
 
@@ -99,10 +100,10 @@ def check_ship_shape(ship: WeakShip):
     """
     if len(ship) == 1:
         return True
-    ship = sorted(ship)
+    ship = Ship(sorted(ship.cells))
     increments = map(
         lambda pair: pair[1] - pair[0],
-        zip(ship, ship[1:]))
+        zip(ship.cells, ship.cells[1:]))
     common_increment = list(set(increments))
     return len(common_increment) == 1 and common_increment[0] in [Coord((0, 1)), Coord((1, 0))]
 
@@ -136,7 +137,7 @@ def check_fleet_config(fleet: Any, is_setup_stage=False) -> Tuple[bool, Optional
         return is_setup_stage, missing_ships
 
 
-def check_ship_bounds(ship: List[Coord]):
+def check_ship_bounds(ship: Ship):
     """
     Проверяет, что корабль внутри поля
     :param ship: Список клеток корабля
@@ -144,7 +145,7 @@ def check_ship_bounds(ship: List[Coord]):
     """
     return all(
         0 <= cell.i < FIELD_DIMENSIONS.i and 0 <= cell.j < FIELD_DIMENSIONS.j
-        for cell in ship
+        for cell in ship.cells
     )
 
 

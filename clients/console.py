@@ -1,5 +1,5 @@
-from field import Field
 from Coord import Coord
+from field import Field
 from my_types.matrix_int import FieldView
 from ui import input_field
 from ui import make_ship_from_str, micro_draw
@@ -22,7 +22,7 @@ class ConsoleClient(Client):
             try:
                 move = make_ship_from_str(input('>'), self.locale)
                 assert len(move) == 1
-                return move[0]
+                return move.cells[0]
             except AssertionError:
                 pass
 

@@ -5,9 +5,9 @@ from typing import List, Optional
 
 from pydash import py_
 
+from Coord import Coord
 from check_field import validate_field, find_ships, get_available_cells, find_straight_segments, check_fleet_config
 from config import CellState, Response, FIELD_DIMENSIONS, SHIP_CONFIG
-from Coord import Coord
 from my_types.matrix_int import FieldView, MatrixInt
 from my_types.weak_ship import WeakShip
 from ship import Ship
@@ -24,7 +24,7 @@ class Field:
         self.exposedCells = set()
 
     def add_fleet(self, ship: WeakShip):
-        new_fleet = self.fleet + [Ship(ship)]
+        new_fleet = self.fleet + [ship]
         f = Field(fleet=new_fleet, player_name=self.player_name)
         try:
             validate_field(f.get_view()[1], is_setup_stage=True)
@@ -139,8 +139,8 @@ class Field:
         chosen_subsegment = choice(available_subsegments)
 
         new_field = py_.clone_deep(acc)
-        for i, j in chosen_subsegment:
-            new_field[i][j] = CellState.CELL_DECK.value
+        for c in chosen_subsegment:
+            new_field[c.i][c.j] = CellState.CELL_DECK.value
 
         return new_field
 

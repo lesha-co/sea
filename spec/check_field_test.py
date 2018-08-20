@@ -1,11 +1,13 @@
 from unittest import TestCase
 
+import pydash as py_
+
+from Coord import Coord
 from check_field import find_checked_cells, find_ships, find_adjacent_cells, \
     validate_field, check_ship_shape, check_fleet_config, get_available_cells, \
     find_straight_segments
 from config import CellState
-from Coord import Coord
-import pydash as py_
+from ship import Ship
 
 
 class FieldValidatorTestCase(TestCase):
@@ -37,9 +39,9 @@ class FieldValidatorTestCase(TestCase):
         ]
         self.assertEqual(
             find_ships(field), [
-                [Coord((0, 1)), Coord((0, 2))],
-                [Coord((1, 4)), Coord((2, 0)), Coord((2, 1)), Coord((2, 2)), Coord((2, 3)), Coord((3, 2))],
-                [Coord((4, 4))]
+                Ship([Coord((0, 1)), Coord((0, 2))]),
+                Ship([Coord((1, 4)), Coord((2, 0)), Coord((2, 1)), Coord((2, 2)), Coord((2, 3)), Coord((3, 2))]),
+                Ship([Coord((4, 4))])
             ]
         )
 
@@ -51,9 +53,9 @@ class FieldValidatorTestCase(TestCase):
 
     def test_check_ship_shape(self) -> None:
         ships = [
-            [Coord((1, 4)), Coord((2, 0)), Coord((2, 1)), Coord((2, 2)), Coord((2, 3)), Coord((3, 2))],
-            [Coord((0, 1)), Coord((0, 2))],
-            [Coord((4, 4))]
+            Ship([Coord((1, 4)), Coord((2, 0)), Coord((2, 1)), Coord((2, 2)), Coord((2, 3)), Coord((3, 2))]),
+            Ship([Coord((0, 1)), Coord((0, 2))]),
+            Ship([Coord((4, 4))])
         ]
         tests = list(map(check_ship_shape, ships))
         self.assertEqual(tests, [False, True, True])

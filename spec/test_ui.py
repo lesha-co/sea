@@ -1,9 +1,11 @@
 from unittest import TestCase
+
 from pydash import py_
 
+from Coord import Coord
 from config import Locale, Theme
 from field import Field
-from Coord import Coord
+from ship import Ship
 from ui import draw_field, make_ship_from_str
 
 
@@ -22,7 +24,7 @@ class DrawFieldTestCase(TestCase):
 
     def setUp(self) -> None:
         self.field = Field(fleet=[
-            [Coord((1, 1)), Coord((1, 2)), Coord((1, 3)), Coord((1, 4))]
+            Ship([Coord((1, 1)), Coord((1, 2)), Coord((1, 3)), Coord((1, 4))])
         ], player_name='player_name')
         self.field.hit(Coord((0, 0)))
         self.field.hit(Coord((1, 0)))
@@ -66,25 +68,25 @@ class MakeShipFromStrTestCase(TestCase):
     def test_horizontal_ru(self) -> None:
         self.assertEqual(
             make_ship_from_str("Г1Е1", Locale.RU),
-            [Coord((0, 3)), Coord((0, 4)), Coord((0, 5))]
+            Ship([Coord((0, 3)), Coord((0, 4)), Coord((0, 5))])
         )
 
     def test_horizontal_ru_2deck(self) -> None:
         self.assertEqual(
             make_ship_from_str("Г1Д1", Locale.RU),
-            [Coord((0, 3)), Coord((0, 4))]
+            Ship([Coord((0, 3)), Coord((0, 4))])
         )
 
     def test_vertical_ru(self) -> None:
         self.assertEqual(
             make_ship_from_str("Г1Г4", Locale.RU),
-            [Coord((0, 3)), Coord((1, 3)), Coord((2, 3)), Coord((3, 3))]
+            Ship([Coord((0, 3)), Coord((1, 3)), Coord((2, 3)), Coord((3, 3))])
         )
 
     def test_vertical_ru_upper_left(self) -> None:
         self.assertEqual(
             make_ship_from_str("А1А4", Locale.RU),
-            [Coord((0, 0)), Coord((1, 0)), Coord((2, 0)), Coord((3, 0))]
+            Ship([Coord((0, 0)), Coord((1, 0)), Coord((2, 0)), Coord((3, 0))])
         )
 
     def test_diagonal_ru(self) -> None:
@@ -96,13 +98,13 @@ class MakeShipFromStrTestCase(TestCase):
     def test_single_ru(self) -> None:
         self.assertEqual(
             make_ship_from_str("Г1", Locale.RU),
-            [Coord((0, 3))]
+            Ship([Coord((0, 3))])
         )
 
     def test_horizontal_en(self) -> None:
         self.assertEqual(
             make_ship_from_str("D1F1", Locale.EN),
-            [Coord((0, 3)), Coord((0, 4)), Coord((0, 5))]
+            Ship([Coord((0, 3)), Coord((0, 4)), Coord((0, 5))])
         )
 
     def test_incorrect_ru(self) -> None:
@@ -120,7 +122,7 @@ class MakeShipFromStrTestCase(TestCase):
     def test_10(self) -> None:
         self.assertEqual(
             make_ship_from_str("А10Г10", Locale.RU),
-            [Coord((9, 0)), Coord((9, 1)), Coord((9, 2)), Coord((9, 3))]
+            Ship([Coord((9, 0)), Coord((9, 1)), Coord((9, 2)), Coord((9, 3))])
         )
 
     def test_out_of_bounds(self) -> None:

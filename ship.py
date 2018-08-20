@@ -1,14 +1,20 @@
 from typing import List, Iterator, Tuple
 
-from helpers import adjacent_square
-from config import CellState
 from Coord import Coord
+from config import CellState
+from helpers import adjacent_square
 
 
 class Ship:
     def __init__(self, cells: List[Coord]):
         self.cells = cells
         self.state = [CellState.CELL_DECK] * len(cells)
+
+    def __eq__(self, other: 'Ship') -> bool:
+        return self.cells == other.cells
+
+    def __str__(self) -> str:
+        return str(self.cells)
 
     def __len__(self) -> int:
         return len(self.cells)
