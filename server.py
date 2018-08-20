@@ -21,12 +21,6 @@ class Server:
             # стреляем в поле противника
             response = target_player.field.hit(move)
 
-            # print("SERVER> Игрок {} стреляет {}. {}".format(
-            #     current_player.client_id,
-            #     from_move(move, locale),
-            #     response.name
-            # ))
-
             # показываем игроку ответ
             current_player.message(str(response.value))
 

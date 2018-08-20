@@ -1,11 +1,11 @@
+from re import findall
+
 from pydash import py_
 
+from Coord import Coord
 from check_field import check_fleet_config
 from config import CellState, Locale, Theme, FIELD_DIMENSIONS
 from field import Field
-from re import findall
-
-from Coord import Coord
 from my_types.matrix_int import FieldView
 from my_types.weak_ship import WeakShip
 
@@ -135,9 +135,11 @@ def input_field(player_name, locale: Locale, theme: Theme):
     f = Field(None, player_name=player_name)
     fleet_correct, diff = check_fleet_config(f.fleet, is_setup_stage=True)
     while diff:
-        print('Игрок {player_name}, выставьте свои корабли: \n'.format(player_name=player_name))
-        print(' ' + draw_slots(diff, theme) + '\n')
-        print(draw_field(f.get_view(draw_contours=True), locale, theme, border=True))
+        print('\n'.join([
+            'Игрок {player_name}, выставьте свои корабли: \n'.format(player_name=player_name),
+            ' ' + draw_slots(diff, theme) + '\n',
+            draw_field(f.get_view(draw_contours=True), locale, theme, border=True)
+        ]))
 
         ship = input("Добавить корабль (⏎ для рандомного поля) >").strip()
         if not ship:

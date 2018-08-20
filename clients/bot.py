@@ -4,10 +4,9 @@ from typing import List
 
 import pydash as py_
 
+from Coord import Coord
 from check_field import find_adjacent_cells, find_ships
 from config import Locale, Theme, CellState
-from Coord import Coord
-from helpers import from_move
 from my_types.matrix_int import MatrixInt
 from .client import Client
 
@@ -33,7 +32,6 @@ class BotClient(Client):
         return 'bot-{}'.format(''.join(choices(ascii_lowercase + digits, k=3)))
 
     def request_move(self, opponent_view: MatrixInt) -> Coord:
-
         ships = find_ships(opponent_view)  # Находим все куски кораблей
 
         # Находим все пустые клетки
@@ -44,17 +42,11 @@ class BotClient(Client):
 
         # Для каждого куска корабля выбираем клетки, где он может продолжаться
         candidates = py_.flat_map(ships, lambda ship: calculate_ship_extension(ship, empty))
-        print('---')
-        print('ships', ships)
-        print('Candidates', py_.map_(candidates, lambda exp: from_move(exp, self.locale)))
 
         # Если таковые есть, стреляем наугад в них
         if candidates:
             shoot = choice(candidates)
-            print('Using first candidate:', from_move(shoot, self.locale))
         # Иначе стреляем вслепую
         else:
             shoot = choice(empty)
-            print('Blindly shoot at:', from_move(shoot, self.locale))
-        print('---')
         return shoot
