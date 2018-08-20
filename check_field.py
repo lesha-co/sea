@@ -5,19 +5,15 @@ from typing import List, Optional, Tuple, Dict, Any
 import pydash as py_
 
 from config import CellState, SHIP_CONFIG, FIELD_DIMENSIONS
-from helpers import group_by_keys
-from my_types.coord import Coord
+from helpers import group_by_keys, orthogonal, adjacent_square
+from Coord import Coord
 from my_types.matrix_int import MatrixInt
 from my_types.weak_ship import WeakShip
 
 
-def inc(a: Coord, b: Coord) -> Coord:
-    return a[0] + b[0], a[1] + b[1]
-
-
 def get_available_cells(field: MatrixInt, dimensions: Coord) -> List[Coord]:
     checked = find_checked_cells(field)
-    all_cells = list(product(range(dimensions[0]), range(dimensions[1])))
+    all_cells = [Coord(tup) for tup in product(range(dimensions.i), range(dimensions.j))]
     nearby = py_.flat_map(checked, lambda cell: find_adjacent_cells(cell, all_cells))
     return list(set(all_cells) - set(nearby) - set(checked))
 
@@ -25,7 +21,7 @@ def get_available_cells(field: MatrixInt, dimensions: Coord) -> List[Coord]:
 def find_straight_segments(cells: List[Coord], vertical: bool = False) -> List[List[Coord]]:
     groups = []
     sorted_cells = sorted(cells)
-    increment = (1, 0) if vertical else (0, 1)
+    increment = Coord((1, 0)) if vertical else Coord((0, 1))
     while sorted_cells:
         group = []
         cell = sorted_cells[0]
@@ -33,15 +29,15 @@ def find_straight_segments(cells: List[Coord], vertical: bool = False) -> List[L
         while cell in sorted_cells:
             sorted_cells.remove(cell)
             group.append(cell)
-            cell = inc(cell, increment)
+            cell += increment
 
         groups.append(group)
     return groups
 
 
-def find_checked_cells(field: MatrixInt):
+def find_checked_cells(field: MatrixInt) -> List[Coord]:
     return [
-        (i, j)
+        Coord((i, j))
         for i, row in enumerate(field)
         for j, cell in enumerate(row)
         if cell in [CellState.CELL_DECK.value, CellState.CELL_DECK_DEAD.value]
@@ -56,17 +52,8 @@ def find_adjacent_cells(origin: Coord, cells: List[Coord], only_orthogonal: bool
     :param cells:
     :return:
     """
-    adjacent_square = [
-        (-1, -1), (-1, 0), (-1, 1),
-        (0, -1), (0, 1),
-        (1, -1), (1, 0), (1, 1),
-    ]
-    orthogonal = [(-1, 0), (0, -1), (0, 1), (1, 0)]
-
     chosen_nearness = orthogonal if only_orthogonal else adjacent_square
-
-    diffs = py_.map_(cells, lambda other: (other[0] - origin[0], other[1] - origin[1]))
-
+    diffs = py_.map_(cells, lambda other: other-origin)
     adjacent = py_.filter_(
         py_.zip_(cells, diffs),
         lambda pair: pair[1] in chosen_nearness,
@@ -114,10 +101,10 @@ def check_ship_shape(ship: WeakShip):
         return True
     ship = sorted(ship)
     increments = map(
-        lambda pair: (pair[1][0] - pair[0][0], pair[1][1] - pair[0][1]),
+        lambda pair: pair[1] - pair[0],
         zip(ship, ship[1:]))
     common_increment = list(set(increments))
-    return len(common_increment) == 1 and common_increment[0] in [(0, 1), (1, 0)]
+    return len(common_increment) == 1 and common_increment[0] in [Coord((0, 1)), Coord((1, 0))]
 
 
 def check_fleet_config(fleet: Any, is_setup_stage=False) -> Tuple[bool, Optional[Dict[int, int]]]:
@@ -156,7 +143,7 @@ def check_ship_bounds(ship: List[Coord]):
     :return: True/False
     """
     return all(
-        0 <= cell[0] < FIELD_DIMENSIONS[0] and 0 <= cell[1] < FIELD_DIMENSIONS[1]
+        0 <= cell.i < FIELD_DIMENSIONS.i and 0 <= cell.j < FIELD_DIMENSIONS.j
         for cell in ship
     )
 

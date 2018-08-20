@@ -4,27 +4,23 @@ from typing import List
 
 import pydash as py_
 
-from check_field import find_adjacent_cells, find_ships, inc
+from check_field import find_adjacent_cells, find_ships
 from config import Locale, Theme, CellState
+from Coord import Coord
 from helpers import from_move
-from my_types.coord import Coord
 from my_types.matrix_int import MatrixInt
 from .client import Client
-
-
-def diff(one: Coord, other: Coord) -> Coord:
-    return other[0] - one[0], other[1] - one[1]
 
 
 def calculate_ship_extension(ship: List[Coord], candidates: List[Coord]) -> List[Coord]:
     if len(ship) == 1:
         return find_adjacent_cells(ship[0], candidates, only_orthogonal=True)
-    increment = diff(ship[0], ship[1])
+    increment = ship[1] - ship[0]
     first, last = ship[0], ship[-1]
-    if increment[1] == 0:  # vertical
-        ext = [inc(first, (-1, 0)), inc(last, (1, 0))]
+    if increment.j == 0:  # vertical
+        ext = [first + Coord((-1, 0)), last + Coord((1, 0))]
     else:  # horizontal
-        ext = [inc(first, (0, -1)), inc(last, (0, 1))]
+        ext = [first, Coord((0, -1)), last + Coord((0, 1))]
 
     return py_.intersection(ext, candidates)
 
@@ -41,7 +37,7 @@ class BotClient(Client):
         ships = find_ships(opponent_view)  # Находим все куски кораблей
 
         # Находим все пустые клетки
-        empty = [(i, j)
+        empty = [Coord((i, j))
                  for i, row in enumerate(opponent_view)
                  for j, cell in enumerate(row)
                  if cell == CellState.CELL_FOG.value]

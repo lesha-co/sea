@@ -1,4 +1,5 @@
 from functools import reduce
+from itertools import product
 from random import choice
 from typing import List, Optional
 
@@ -6,7 +7,7 @@ from pydash import py_
 
 from check_field import validate_field, find_ships, get_available_cells, find_straight_segments, check_fleet_config
 from config import CellState, Response, FIELD_DIMENSIONS, SHIP_CONFIG
-from my_types.coord import Coord
+from Coord import Coord
 from my_types.matrix_int import FieldView, MatrixInt
 from my_types.weak_ship import WeakShip
 from ship import Ship
@@ -78,20 +79,19 @@ class Field:
             for ship in self.fleet:
                 contours.update(ship.all_adjacent_cells())
 
-        for i in range(FIELD_DIMENSIONS[0]):
-            for j in range(FIELD_DIMENSIONS[1]):
-                if opponent and not (i, j) in self.exposedCells:
-                    view[i][j] = CellState.CELL_FOG.value
+        for i, j in product(range(FIELD_DIMENSIONS.i), range(FIELD_DIMENSIONS.j)):
+            if opponent and not Coord((i, j)) in self.exposedCells:
+                view[i][j] = CellState.CELL_FOG.value
+            else:
+                ship = self.lookup_ship(Coord((i, j)))
+                if ship:
+                    view[i][j] = ship.get_cell(Coord((i, j))).value
+                elif Coord((i, j)) in self.exposedCells:
+                    view[i][j] = CellState.CELL_MISS.value
+                elif Coord((i, j)) in contours:
+                    view[i][j] = CellState.CELL_CANT_PLACE_SHIP.value
                 else:
-                    ship = self.lookup_ship((i, j))
-                    if ship:
-                        view[i][j] = ship.get_cell((i, j)).value
-                    elif (i, j) in self.exposedCells:
-                        view[i][j] = CellState.CELL_MISS.value
-                    elif (i, j) in contours:
-                        view[i][j] = CellState.CELL_CANT_PLACE_SHIP.value
-                    else:
-                        view[i][j] = CellState.CELL_EMPTY.value
+                    view[i][j] = CellState.CELL_EMPTY.value
 
         return self.player_name, view
 
@@ -99,8 +99,8 @@ class Field:
     def make_field(opponent=False) -> MatrixInt:
         field = []
         initial = CellState.CELL_FOG if opponent else CellState.CELL_EMPTY
-        for i in range(FIELD_DIMENSIONS[0]):
-            field.append([initial.value] * FIELD_DIMENSIONS[1])
+        for i in range(FIELD_DIMENSIONS.i):
+            field.append([initial.value] * FIELD_DIMENSIONS.j)
         return field
 
     @staticmethod

@@ -4,7 +4,10 @@ from check_field import check_fleet_config
 from config import CellState, Locale, Theme, FIELD_DIMENSIONS
 from field import Field
 from re import findall
+
+from Coord import Coord
 from my_types.matrix_int import FieldView
+from my_types.weak_ship import WeakShip
 
 CELL_WIDTH = 3
 
@@ -49,7 +52,7 @@ def draw_field(v: FieldView, locale: Locale, theme: Theme,
     raw_rows = py_.map_(view, lambda row: py_.chain(row).map_(theme.value.get).join().value())
     line_numbers_fmt = '{{: {}{}}}'.format('<' if numbers_right else '>', CELL_WIDTH)
     line_numbers = py_.map_(
-        list(range(1, FIELD_DIMENSIONS[0] + 1)),
+        list(range(1, FIELD_DIMENSIONS.i + 1)),
         line_numbers_fmt.format
     )
     if numbers_right:
@@ -79,7 +82,7 @@ def to_cell_coordinates(item, locale: Locale):
         return None
 
 
-def make_ship_from_str(string: str, locale: Locale):
+def make_ship_from_str(string: str, locale: Locale) -> WeakShip:
     
     alpha = locale.value
     pattern = r'^([{}])(\d+)(?:([{}])(\d+))?$'.format(alpha, alpha)
@@ -89,35 +92,35 @@ def make_ship_from_str(string: str, locale: Locale):
     ship = py_.map_(findings[0], lambda item: to_cell_coordinates(item, locale))
     if ship[2] is None:
         # single deck ship
-        assert 0 <= ship[1] < FIELD_DIMENSIONS[0], 'Incorrect input'
-        assert 0 <= ship[0] < FIELD_DIMENSIONS[1], 'Incorrect input'
-        return [(ship[1], ship[0])]
+        assert 0 <= ship[1] < FIELD_DIMENSIONS.i, 'Incorrect input'
+        assert 0 <= ship[0] < FIELD_DIMENSIONS.j, 'Incorrect input'
+        coord = Coord((ship[1], ship[0]))
+        return [coord]
 
     else:
-        assert 0 <= ship[1] < FIELD_DIMENSIONS[0], 'Incorrect input'
-        assert 0 <= ship[0] < FIELD_DIMENSIONS[1], 'Incorrect input'
-        assert 0 <= ship[3] < FIELD_DIMENSIONS[0], 'Incorrect input'
-        assert 0 <= ship[2] < FIELD_DIMENSIONS[1], 'Incorrect input'
+        assert 0 <= ship[1] < FIELD_DIMENSIONS.i, 'Incorrect input'
+        assert 0 <= ship[0] < FIELD_DIMENSIONS.j, 'Incorrect input'
+        assert 0 <= ship[3] < FIELD_DIMENSIONS.i, 'Incorrect input'
+        assert 0 <= ship[2] < FIELD_DIMENSIONS.j, 'Incorrect input'
 
-        start = [ship[1], ship[0]]
-        finish = [ship[3], ship[2]]
-        diff = py_.chain(py_.zip_(start, finish)).map_(lambda x: x[1] - x[0]).value()
-        if diff[0] and diff[1]:
+        start = Coord((ship[1], ship[0]))
+        finish = Coord((ship[3], ship[2]))
+        diff = finish - start
+        if diff.i and diff.j:
             raise Exception('Ship should be a straight line')
 
-        if diff[0] == 0:  # vertical
-            increment = [0, 1]
+        if diff.i == 0:  # vertical
+            increment = Coord((0, 1))
         else:  # horizontal
-            increment = [1, 0]
+            increment = Coord((1, 0))
 
         ship = []
         current = start
         while current != finish:
-            ship.append((*current,))
-            current[0] += increment[0]
-            current[1] += increment[1]
+            ship.append(current)
+            current += increment
 
-        ship.append(tuple(finish))
+        ship.append(finish)
         return ship
 
 

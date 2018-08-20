@@ -2,10 +2,19 @@ from typing import Dict, List, Optional, TypeVar, Iterable
 
 from pydash import py_
 
+from Coord import Coord
 from config import Locale
-from my_types.coord import Coord
 
 T = TypeVar('T')
+
+
+adjacent_square = py_.map([
+    (-1, -1), (-1, 0), (-1, 1),
+    (0, -1), (0, 1),
+    (1, -1), (1, 0), (1, 1),
+], Coord)
+
+orthogonal = py_.map_([(-1, 0), (0, -1), (0, 1), (1, 0)], Coord)
 
 
 def group_by_keys(dicts: Iterable[Dict[str, T]], default_value: Optional[T] = None) -> Dict[str, List[T]]:
@@ -19,4 +28,4 @@ def group_by_keys(dicts: Iterable[Dict[str, T]], default_value: Optional[T] = No
 
 
 def from_move(move: Coord, locale: Locale) -> str:
-    return '{}{}'.format(locale.value[move[1]], move[0] + 1)
+    return '{}{}'.format(locale.value[move.j], move.i + 1)

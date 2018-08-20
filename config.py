@@ -1,5 +1,7 @@
 from enum import Enum
 
+from Coord import Coord
+
 
 class CellState(Enum):
     CELL_FOG = 0
@@ -30,7 +32,7 @@ SHIP_CONFIG = {
     4: 1
 }
 
-FIELD_DIMENSIONS = (10, 10)
+FIELD_DIMENSIONS = Coord((10, 10))
 
 
 class Theme(Enum):

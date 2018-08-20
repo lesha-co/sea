@@ -1,6 +1,6 @@
 from config import Locale, Theme
 from field import Field
-from my_types.coord import Coord
+from Coord import Coord
 from my_types.matrix_int import FieldView
 
 

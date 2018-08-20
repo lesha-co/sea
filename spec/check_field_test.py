@@ -4,6 +4,8 @@ from check_field import find_checked_cells, find_ships, find_adjacent_cells, \
     validate_field, check_ship_shape, check_fleet_config, get_available_cells, \
     find_straight_segments
 from config import CellState
+from Coord import Coord
+import pydash as py_
 
 
 class FieldValidatorTestCase(TestCase):
@@ -22,7 +24,7 @@ class FieldValidatorTestCase(TestCase):
         ]
         self.assertEqual(
             find_checked_cells(field),
-            [(0, 1), (0, 2), (2, 0), (2, 1), (2, 2), (2, 3)]
+            [Coord((0, 1)), Coord((0, 2)), Coord((2, 0)), Coord((2, 1)), Coord((2, 2)), Coord((2, 3))]
         )
 
     def test_find_ships(self) -> None:
@@ -35,23 +37,23 @@ class FieldValidatorTestCase(TestCase):
         ]
         self.assertEqual(
             find_ships(field), [
-                [(0, 1), (0, 2)],
-                [(1, 4), (2, 0), (2, 1), (2, 2), (2, 3), (3, 2)],
-                [(4, 4)]
+                [Coord((0, 1)), Coord((0, 2))],
+                [Coord((1, 4)), Coord((2, 0)), Coord((2, 1)), Coord((2, 2)), Coord((2, 3)), Coord((3, 2))],
+                [Coord((4, 4))]
             ]
         )
 
     def test_find_adjacent_cells(self) -> None:
-        cells = [(2, 2), (2, 3), (2, 1), (1, 2), (3, 2), (3, 3), (0, 0)]
-        self.assertEqual(find_adjacent_cells(cells[0], cells), [
+        cells = py_.map_([(2, 2), (2, 3), (2, 1), (1, 2), (3, 2), (3, 3), (0, 0)], Coord)
+        self.assertEqual(find_adjacent_cells(cells[0], cells), py_.map_([
             (2, 3), (2, 1), (1, 2), (3, 2), (3, 3)
-        ])
+        ], Coord))
 
     def test_check_ship_shape(self) -> None:
         ships = [
-            [(1, 4), (2, 0), (2, 1), (2, 2), (2, 3), (3, 2)],
-            [(0, 1), (0, 2)],
-            [(4, 4)]
+            [Coord((1, 4)), Coord((2, 0)), Coord((2, 1)), Coord((2, 2)), Coord((2, 3)), Coord((3, 2))],
+            [Coord((0, 1)), Coord((0, 2))],
+            [Coord((4, 4))]
         ]
         tests = list(map(check_ship_shape, ships))
         self.assertEqual(tests, [False, True, True])
@@ -110,7 +112,9 @@ class FieldValidator(TestCase):
             validate_field(field_wrong_shape)
 
         self.assertEqual(ctx.exception.args[0],
-                         'There is a deformed ship somewhere on the field ([(1, 6), (2, 4), (2, 5), (2, 6)])')
+                         'There is a deformed ship somewhere on the field '
+                         '([Coord.Coord((1,6)), Coord.Coord((2,4)), Coord.Coord((2,5)), '
+                         'Coord.Coord((2,6))])')
 
     def test_validate_field_extra_ship(self) -> None:
         field_extra_ship = [
@@ -150,7 +154,7 @@ class FieldValidator(TestCase):
             validate_field(field_ship_outside_bounds)
 
         self.assertEqual(ctx.exception.args[0],
-                         'Ship outside bounds ([(10, 1)])')
+                         'Ship outside bounds ([Coord.Coord((10,1))])')
 
 
 class FleetConfigValidator(TestCase):
@@ -227,9 +231,10 @@ class GetAvailableCellsValidator(TestCase):
         ]
         self.assertEqual(
             [
-                (0, 3), (1, 3), (2, 3), (3, 0), (3, 1), (3, 2), (3, 3)
+                Coord((0, 3)), Coord((1, 3)), Coord((2, 3)),
+                Coord((3, 0)), Coord((3, 1)), Coord((3, 2)), Coord((3, 3))
             ],
-            sorted(get_available_cells(field, (4, 4)))
+            sorted(get_available_cells(field, Coord((4, 4))))
         )
 
     def test_bigger_field(self) -> None:
@@ -241,11 +246,11 @@ class GetAvailableCellsValidator(TestCase):
             [0, 0, 0, 0, 0, 0]
         ]
         self.assertEqual(
-            [
+            py_.map_([
                 (0, 3), (0, 4), (0, 5),
                 (3, 0), (3, 1), (3, 2)
-            ],
-            sorted(get_available_cells(field, (4, 6)))
+            ], Coord),
+            sorted(get_available_cells(field, Coord((4, 6))))
         )
 
 
@@ -260,12 +265,12 @@ class FindStraightSegmentsValidator(TestCase):
         ]
         self.assertEqual(
             [
-                [(0, 3)],
-                [(1, 3)],
-                [(2, 3)],
-                [(3, 0), (3, 1), (3, 2), (3, 3)]
+                [Coord((0, 3))],
+                [Coord((1, 3))],
+                [Coord((2, 3))],
+                [Coord((3, 0)), Coord((3, 1)), Coord((3, 2)), Coord((3, 3))]
             ],
-            find_straight_segments(get_available_cells(field, (4, 4)))
+            find_straight_segments(get_available_cells(field, Coord((4, 4))))
         )
 
     def test_singular_vertical(self) -> None:
@@ -278,13 +283,13 @@ class FindStraightSegmentsValidator(TestCase):
         ]
         self.assertEqual(
             [
-                [(0, 3), (1, 3), (2, 3), (3, 3)],
-                [(3, 0)],
-                [(3, 1)],
-                [(3, 2)]
+                [Coord((0, 3)), Coord((1, 3)), Coord((2, 3)), Coord((3, 3))],
+                [Coord((3, 0))],
+                [Coord((3, 1))],
+                [Coord((3, 2))]
             ],
             find_straight_segments(
-                get_available_cells(field, (4, 4)),
+                get_available_cells(field, Coord((4, 4))),
                 vertical=True
             )
         )

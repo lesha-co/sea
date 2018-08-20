@@ -1,7 +1,8 @@
 from typing import List, Iterator, Tuple
 
+from helpers import adjacent_square
 from config import CellState
-from my_types.coord import Coord
+from Coord import Coord
 
 
 class Ship:
@@ -27,15 +28,10 @@ class Ship:
         return all(map(lambda state: state == CellState.CELL_DECK_DEAD, self.state))
 
     def all_adjacent_cells(self) -> List[Coord]:
-        adjacent_square = [
-            (-1, -1), (-1, 0), (-1, 1),
-            (0, -1), (0, 1),
-            (1, -1), (1, 0), (1, 1),
-        ]
         all_adjacent_cells = []
         for cell in self.cells:
             for adj in adjacent_square:
-                new_adj = (cell[0] + adj[0], cell[1] + adj[1])
+                new_adj = cell + adj
                 if new_adj not in all_adjacent_cells and new_adj not in self.cells:
                     all_adjacent_cells.append(new_adj)
 
