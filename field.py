@@ -9,12 +9,11 @@ from Coord import Coord
 from check_field import validate_field, find_ships, get_available_cells, find_straight_segments, check_fleet_config
 from config import CellState, Response, FIELD_DIMENSIONS, SHIP_CONFIG
 from my_types.matrix_int import FieldView, MatrixInt
-from my_types.weak_ship import WeakShip
 from ship import Ship
 
 
 class Field:
-    def __init__(self, fleet: Optional[List[WeakShip]] = None, player_name='') -> None:
+    def __init__(self, fleet: Optional[List[Ship]] = None, player_name='') -> None:
         self.player_name = player_name
         if fleet is None:
             fleet = []
@@ -23,7 +22,7 @@ class Field:
         self.fleet = fleet
         self.exposedCells = set()
 
-    def add_fleet(self, ship: WeakShip):
+    def add_fleet(self, ship: Ship):
         new_fleet = self.fleet + [ship]
         f = Field(fleet=new_fleet, player_name=self.player_name)
         try:

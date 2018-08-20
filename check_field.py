@@ -8,7 +8,6 @@ from Coord import Coord
 from config import CellState, SHIP_CONFIG, FIELD_DIMENSIONS
 from helpers import group_by_keys, orthogonal, adjacent_square
 from my_types.matrix_int import MatrixInt
-from my_types.weak_ship import WeakShip
 from ship import Ship
 
 
@@ -92,7 +91,7 @@ def find_ships(field: MatrixInt) -> List[Ship]:
     return found_ships
 
 
-def check_ship_shape(ship: WeakShip):
+def check_ship_shape(ship: Ship):
     """
     Проверяет форму корабля
     :param ship: Список клеток корабля

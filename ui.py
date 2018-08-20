@@ -7,7 +7,6 @@ from check_field import check_fleet_config
 from config import CellState, Locale, Theme, FIELD_DIMENSIONS
 from field import Field
 from my_types.matrix_int import FieldView
-from my_types.weak_ship import WeakShip
 from ship import Ship
 
 CELL_WIDTH = 3
@@ -83,7 +82,7 @@ def to_cell_coordinates(item, locale: Locale):
         return None
 
 
-def make_ship_from_str(string: str, locale: Locale) -> WeakShip:
+def make_ship_from_str(string: str, locale: Locale) -> Ship:
     
     alpha = locale.value
     pattern = r'^([{}])(\d+)(?:([{}])(\d+))?$'.format(alpha, alpha)
