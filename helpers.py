@@ -7,8 +7,7 @@ from config import Locale
 
 T = TypeVar('T')
 
-
-adjacent_square = py_.map([
+adjacent_square = py_.map_([
     (-1, -1), (-1, 0), (-1, 1),
     (0, -1), (0, 1),
     (1, -1), (1, 0), (1, 1),
