@@ -10,7 +10,7 @@ class GetViewTestCase(TestCase):
         ])
 
     def test_view_player(self) -> None:
-        self.assertEqual(self.field.get_view(opponent=False), [
+        self.assertEqual(self.field.get_view(opponent=False)[1], [
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
             [1, 2, 2, 2, 2, 1, 1, 1, 1, 1],
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -24,7 +24,7 @@ class GetViewTestCase(TestCase):
         ])
 
     def test_view_opponent(self) -> None:
-        self.assertEqual(self.field.get_view(opponent=True), [
+        self.assertEqual(self.field.get_view(opponent=True)[1], [
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -40,7 +40,7 @@ class GetViewTestCase(TestCase):
     def test_view_player_hit_ship(self) -> None:
         self.field.hit((1, 1))
 
-        self.assertEqual(self.field.get_view(opponent=False), [
+        self.assertEqual(self.field.get_view(opponent=False)[1], [
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
             [1, -2, 2, 2, 2, 1, 1, 1, 1, 1],
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -56,7 +56,7 @@ class GetViewTestCase(TestCase):
     def test_view_opponent_hit_ship(self) -> None:
         self.field.hit((1, 1))
 
-        self.assertEqual(self.field.get_view(opponent=True), [
+        self.assertEqual(self.field.get_view(opponent=True)[1], [
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, -2, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -75,7 +75,7 @@ class GetViewTestCase(TestCase):
         self.field.hit((1, 3))
         self.field.hit((1, 4))
 
-        self.assertEqual(self.field.get_view(opponent=True), [
+        self.assertEqual(self.field.get_view(opponent=True)[1], [
             [-1, -1, -1, -1, -1, -1, 0, 0, 0, 0],
             [-1, -2, -2, -2, -2, -1, 0, 0, 0, 0],
             [-1, -1, -1, -1, -1, -1, 0, 0, 0, 0],

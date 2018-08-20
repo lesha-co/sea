@@ -1,6 +1,7 @@
 from config import Locale, Theme
 from field import Field
 from my_types.coord import Coord
+from my_types.matrix_int import FieldView
 
 
 class Client:
@@ -27,11 +28,10 @@ class Client:
         """
         return Field.generate_random_field(self.client_id)
 
-    def request_move(self, my_field: Field, opponent_field: Field) -> Coord:
+    def request_move(self, opponent_view: FieldView) -> Coord:
         """
         Сервер запрашивает ход
-        :param my_field: поле игрока
-        :param opponent_field: поле противника
+        :param opponent_view: представление поля противника
         :return: tuple(int, int)
         """
         raise Exception('Can\'t use base class')
@@ -43,5 +43,5 @@ class Client:
         """
         pass
 
-    def conclude(self, message: str, my_field: Field, opponent_field: Field):
+    def conclude(self, message: str, opponent_view: FieldView):
         return self.message(message)

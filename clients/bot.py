@@ -1,4 +1,4 @@
-from random import choices, randint, choice
+from random import choices, choice
 from string import ascii_lowercase, digits
 from typing import List
 
@@ -6,9 +6,9 @@ import pydash as py_
 
 from check_field import find_adjacent_cells, find_ships, inc
 from config import Locale, Theme, CellState
-from field import Field
 from helpers import from_move
 from my_types.coord import Coord
+from my_types.matrix_int import MatrixInt
 from .client import Client
 
 
@@ -19,11 +19,11 @@ def diff(one: Coord, other: Coord) -> Coord:
 def calculate_ship_extension(ship: List[Coord], candidates: List[Coord]) -> List[Coord]:
     if len(ship) == 1:
         return find_adjacent_cells(ship[0], candidates, only_orthogonal=True)
-    incr = diff(ship[0], ship[1])
+    increment = diff(ship[0], ship[1])
     first, last = ship[0], ship[-1]
-    if incr[1] == 0:  # vert
+    if increment[1] == 0:  # vertical
         ext = [inc(first, (-1, 0)), inc(last, (1, 0))]
-    else:  # horiz
+    else:  # horizontal
         ext = [inc(first, (0, -1)), inc(last, (0, 1))]
 
     return py_.intersection(ext, candidates)
@@ -36,13 +36,13 @@ class BotClient(Client):
     def request_name(self) -> str:
         return 'bot-{}'.format(''.join(choices(ascii_lowercase + digits, k=3)))
 
-    def request_move(self, my_field: Field, opponent_field: Field) -> Coord:
-        v = opponent_field.get_view(opponent=True)
-        ships = find_ships(v) # Находим все куски кораблей
+    def request_move(self, opponent_view: MatrixInt) -> Coord:
+
+        ships = find_ships(opponent_view)  # Находим все куски кораблей
 
         # Находим все пустые клетки
         empty = [(i, j)
-                 for i, row in enumerate(v)
+                 for i, row in enumerate(opponent_view)
                  for j, cell in enumerate(row)
                  if cell == CellState.CELL_FOG.value]
 

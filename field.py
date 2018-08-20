@@ -7,7 +7,7 @@ from pydash import py_
 from check_field import validate_field, find_ships, get_available_cells, find_straight_segments, check_fleet_config
 from config import CellState, Response, FIELD_DIMENSIONS, SHIP_CONFIG
 from my_types.coord import Coord
-from my_types.matrix_int import MatrixInt
+from my_types.matrix_int import FieldView, MatrixInt
 from my_types.weak_ship import WeakShip
 from ship import Ship
 
@@ -26,7 +26,7 @@ class Field:
         new_fleet = self.fleet + [Ship(ship)]
         f = Field(fleet=new_fleet, player_name=self.player_name)
         try:
-            validate_field(f.get_view(), is_setup_stage=True)
+            validate_field(f.get_view()[1], is_setup_stage=True)
             self.fleet = new_fleet
         except AssertionError as x:
             raise BaseException('field is incorrect', x, ship)
@@ -64,7 +64,7 @@ class Field:
         else:
             return Response.MISS
 
-    def get_view(self, opponent: bool = False, draw_contours: bool = False):
+    def get_view(self, opponent: bool = False, draw_contours: bool = False) -> FieldView:
         """
         Построить вид поля
         :param opponent: строить с учетом exposedCells
@@ -93,7 +93,7 @@ class Field:
                     else:
                         view[i][j] = CellState.CELL_EMPTY.value
 
-        return view
+        return self.player_name, view
 
     @staticmethod
     def make_field(opponent=False) -> MatrixInt:
@@ -111,7 +111,7 @@ class Field:
     def generate_random_field(player_name: str, base: Optional['Field'] = None) -> 'Field':
         missing_config = SHIP_CONFIG
         if base:
-            initial = base.get_view()
+            initial = base.get_view()[1]
             _, missing_config = check_fleet_config(find_ships(initial), True)
         else:
             initial = Field.make_field()
@@ -149,9 +149,8 @@ if __name__ == '__main__':
     from ui import draw_field
     from config import Locale, Theme
     print(draw_field(
-        Field.generate_random_field('== DEMO RUN =='),
+        Field.generate_random_field('== DEMO RUN ==').get_view(draw_contours=True),
         Locale.EN,
         Theme.MAIN,
         border=True,
-        contours=True
     ))

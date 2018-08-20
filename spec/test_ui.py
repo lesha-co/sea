@@ -7,8 +7,11 @@ from ui import draw_field, make_ship_from_str
 
 
 class DrawFieldTestCase(TestCase):
-    def common(self, sample: str, *draw_args, **draw_kwargs) -> None:
-        s = draw_field(*draw_args, **draw_kwargs)
+    def common(self, sample: str,
+               fld: Field, loc: Locale, thm: Theme,
+               numbers_right: bool, opponent: bool, border: bool=False) -> None:
+        v = fld.get_view(opponent)
+        s = draw_field(v, loc, thm, numbers_right, border)
 
         with open('./fixtures/{}.txt'.format(sample), 'r', encoding='utf8') as f:
             expected_lines = f.readlines()

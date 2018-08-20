@@ -4,27 +4,28 @@ from check_field import check_fleet_config
 from config import CellState, Locale, Theme, FIELD_DIMENSIONS
 from field import Field
 from re import findall
+from my_types.matrix_int import FieldView
 
 CELL_WIDTH = 3
 
 
-def micro_draw(target_field: Field, current_field: Field, expose_opponent=False, **kwargs) -> str:
+def micro_draw(target_view: FieldView, current_view: FieldView, **kwargs) -> str:
 
-    draw_left = draw_field(target_field, numbers_right=False, opponent=True, **kwargs).split('\n')
-    draw_right = draw_field(current_field, numbers_right=True, opponent=expose_opponent, **kwargs).split('\n')
+    draw_left = draw_field(target_view, numbers_right=False, **kwargs).split('\n')
+    draw_right = draw_field(current_view, numbers_right=True, **kwargs).split('\n')
 
     lines = py_.zip_(draw_left, draw_right)
     combo_lines = py_.map_(lines, lambda pair: ' : '.join(pair))
     return '\n'.join(combo_lines)
 
 
-def draw_field(fld: Field, locale: Locale, theme: Theme,
+def draw_field(v: FieldView, locale: Locale, theme: Theme,
                numbers_right: bool = False,
-               opponent: bool = False,
-               border: bool = False,
-               contours: bool = False):
+               border: bool = False):
+
+    name_label, view = v
     header = py_.chain(locale.value).map_(lambda x: "{: ^{}}".format(x, CELL_WIDTH)).join().value()
-    name_header = '{:<{}}'.format(fld.player_name, CELL_WIDTH*len(locale.value))
+    name_header = '{:<{}}'.format(name_label, CELL_WIDTH*len(locale.value))
     if numbers_right:
         name_header = ' '.join([name_header, ' ' * CELL_WIDTH])
         header = ' '.join([header, ' ' * CELL_WIDTH])
@@ -45,7 +46,6 @@ def draw_field(fld: Field, locale: Locale, theme: Theme,
             header = '  ' + header
             name_header = '  ' + name_header
 
-    view = fld.get_view(opponent, contours)
     raw_rows = py_.map_(view, lambda row: py_.chain(row).map_(theme.value.get).join().value())
     line_numbers_fmt = '{{: {}{}}}'.format('<' if numbers_right else '>', CELL_WIDTH)
     line_numbers = py_.map_(
@@ -134,7 +134,7 @@ def input_field(player_name, locale: Locale, theme: Theme):
     while diff:
         print('Игрок {player_name}, выставьте свои корабли: \n'.format(player_name=player_name))
         print(' ' + draw_slots(diff, theme) + '\n')
-        print(draw_field(f, locale, theme, border=True, contours=True))
+        print(draw_field(f.get_view(draw_contours=True), locale, theme, border=True))
 
         ship = input("Добавить корабль (⏎ для рандомного поля) >").strip()
         if not ship:

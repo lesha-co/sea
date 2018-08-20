@@ -1,6 +1,5 @@
 from clients import ConsoleClient, BotClient
 from config import Response, Theme, Locale
-from helpers import from_move
 
 
 class Server:
@@ -16,10 +15,7 @@ class Server:
         while True:
             # Запрашиваем у текущего игрока ход:
             move = current_player.request_move(
-                current_player.field,
-                # это раскрывает поле игрока для противника, но мы честные люди и
-                # будем использовать его только для отрисовки в режиме оппонента:
-                target_player.field
+                target_player.field.get_view(opponent=True)
             )
 
             # стреляем в поле противника
@@ -40,8 +36,8 @@ class Server:
                 current_player, target_player = target_player, current_player
             if response == Response.LOST:
                 # оповещаем игроков о конце игры
-                current_player.conclude('Вы выиграли!', current_player.field, target_player.field)
-                target_player.conclude('Вы проиграли!', target_player.field, current_player.field )
+                current_player.conclude('Вы выиграли!', target_player.field.get_view())
+                target_player.conclude('Вы проиграли!', current_player.field.get_view())
                 break
 
 

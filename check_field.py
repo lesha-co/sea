@@ -23,7 +23,6 @@ def get_available_cells(field: MatrixInt, dimensions: Coord) -> List[Coord]:
 
 
 def find_straight_segments(cells: List[Coord], vertical: bool = False) -> List[List[Coord]]:
-
     groups = []
     sorted_cells = sorted(cells)
     increment = (1, 0) if vertical else (0, 1)
@@ -62,12 +61,11 @@ def find_adjacent_cells(origin: Coord, cells: List[Coord], only_orthogonal: bool
         (0, -1), (0, 1),
         (1, -1), (1, 0), (1, 1),
     ]
-    ortho = [(-1, 0), (0, -1), (0, 1), (1, 0)]
+    orthogonal = [(-1, 0), (0, -1), (0, 1), (1, 0)]
 
-    chosen_nearness = ortho if only_orthogonal else adjacent_square
+    chosen_nearness = orthogonal if only_orthogonal else adjacent_square
 
     diffs = py_.map_(cells, lambda other: (other[0] - origin[0], other[1] - origin[1]))
-
 
     adjacent = py_.filter_(
         py_.zip_(cells, diffs),
