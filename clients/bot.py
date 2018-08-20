@@ -7,13 +7,12 @@ import pydash as py_
 from Coord import Coord
 from check_field import find_adjacent_cells, find_ships
 from config import Locale, Theme, CellState
-from my_types.matrix_int import FieldView
+from my_types.matrix_int import FieldView, MatrixInt
 from ship import Ship
 from .client import Client
 
 
-def get_move_candidates(opponent_view: FieldView) -> List[Coord]:
-    v = opponent_view[1]
+def get_move_candidates(v: MatrixInt) -> List[Coord]:
     ships = find_ships(v)  # Находим все куски кораблей
 
     # Находим все пустые клетки
@@ -35,7 +34,7 @@ def calculate_ship_extension(ship: Ship, candidates: List[Coord]) -> List[Coord]
     if increment.j == 0:  # vertical
         ext = [first + Coord((-1, 0)), last + Coord((1, 0))]
     else:  # horizontal
-        ext = [first, Coord((0, -1)), last + Coord((0, 1))]
+        ext = [first + Coord((0, -1)), last + Coord((0, 1))]
 
     return py_.intersection(ext, candidates)
 
@@ -48,4 +47,4 @@ class BotClient(Client):
         return 'bot-{}'.format(''.join(choices(ascii_lowercase + digits, k=3)))
 
     def request_move(self, opponent_view: FieldView) -> Coord:
-        return choice(get_move_candidates(opponent_view))
+        return choice(get_move_candidates(opponent_view[1]))
